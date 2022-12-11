@@ -1,0 +1,14 @@
+Src. https://cassandra.apache.org/doc/latest/cassandra/data_modeling/data_modeling_logical.html
+
+- apartments_by_sale
+- apartments_by_rent
+
+- apartments_by_city_address
+- apartments
+
+- owner_by_apartment
+- rooms_by_apartment
+- room
+
+- rooms_by_rent
+- owner_by_room
