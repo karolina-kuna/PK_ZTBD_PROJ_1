@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="data_model" id="54E5068B-E8DD-8BD6-0524-3925891CF7A8" version="3.5">
+<createdBy>witol</createdBy>
+<createdTime>2022-12-19 13:54:15 UTC</createdTime>
+<ownerDesignName>data_model</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>54E5068B-E8DD-8BD6-0524-3925891CF7A8</designId>
+</OSDM_Design>
