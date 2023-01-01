@@ -1,0 +1,63 @@
+version: "3"
+
+services:
+
+  market-app: &market-app
+    build:
+      dockerfile: "./docker/Dockerfile"
+      context: "."
+    image: devbox:latest
+    environment: &note-app_env
+      APP_HOST: "0.0.0.0"
+      APP_PORT: 5000
+      LOG_LEVEL: "debug"
+      DB_USERNAME: "user"
+      DB_PASSWORD: "Password"
+      DB_HOST: "database"
+      DB_PORT: "5432"
+      DB_NAME: "database"
+    tty: true
+    depends_on:
+      - postgres_db
+      - cassandra_db
+      - mongo_db
+    ports:
+      - "5001:5000"
+    volumes:
+      - ".:/app"
+
+  postgres_db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: "database"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "Password"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - db-vol:/var/lib/postgresql/data/pgdata
+
+  cassandra_db:
+    image: cassandra:latest
+    ports:
+      - 7000:7000
+      - 7001:7001
+      - 7199:7199
+      - 9042:9042
+      - 9160:9160
+    environment:
+      - CASSANDRA_CLUSTER_NAME=MyCassandraCluster
+      - CASSANDRA_DC=DC1
+      - CASSANDRA_RACK=Rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+
+  mongo_db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb-data:/data/db
+
+volumes:
+  mongodb-data:
+  db-vol:
