@@ -1,16 +1,14 @@
-db.createCollection("apartment", {
+use market_app_db
+
+
+db.createCollection("apartment_list", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["apartment_id"],
       properties: {
-        apartment_id: {
-          bsonType: "int",
-          description: "must be an integer and is required"
-        },
         area: {
-          bsonType: "float",
-          description: "must be a float"
+          bsonType: "double",
+          description: "must be a double"
         },
         creation_year: {
           bsonType: "int",
@@ -41,16 +39,11 @@ db.createCollection("apartment", {
   }
 })
 
-db.createCollection("owner", {
+db.createCollection("owner_list", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["owner_id"],
       properties: {
-        owner_id: {
-          bsonType: "int",
-          description: "must be an integer and is required"
-        },
         surname: {
           bsonType: "string",
           description: "must be a string"
@@ -76,16 +69,11 @@ db.createCollection("owner", {
   }
 })
 
-db.createCollection("offers", {
+db.createCollection("offer_list", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["offer_id"],
       properties: {
-        offer_id: {
-          bsonType: "int",
-          description: "must be an integer and is required"
-        },
         address_city: {
           bsonType: "string",
           description: "must be a string"
@@ -95,16 +83,16 @@ db.createCollection("offers", {
           description: "must be a string"
         },
         price: {
-          bsonType: "float",
-          description: "must be a float"
+          bsonType: "double",
+          description: "must be a double"
         },
         title: {
           bsonType: "string",
           description: "must be a string"
         },
         area: {
-          bsonType: "float",
-          description: "must be a float"
+          bsonType: "double",
+          description: "must be a double"
         },
         owner_id: {
           bsonType: "int",
@@ -123,6 +111,6 @@ db.createCollection("offers", {
   }
 })
 
-db.offers.createIndex({ address_city: 1, address_street: 1 })
-db.offers.createIndex({ address_city: 1, address_street: 1, price: 1 })
-db.offers.createIndex({ company_name: 1 })
+db.offer_list.createIndex({ address_city: 1, address_street: 1 })
+db.offer_list.createIndex({ address_city: 1, address_street: 1, price: 1 })
+db.offer_list.createIndex({ company_name: 1 })
