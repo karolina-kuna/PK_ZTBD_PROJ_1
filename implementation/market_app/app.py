@@ -2,8 +2,8 @@ import logging
 
 from fastapi import FastAPI
 
-from authors_service.routers.authors import authors_router
-from authors_service.settings import SETTINGS
+from market_app.routers.sales_routers import sales_router
+from settings import SETTINGS
 
 FORMAT = "[%(asctime)s][%(levelname)s][%(name)s] %(message)s"
 logging.basicConfig(

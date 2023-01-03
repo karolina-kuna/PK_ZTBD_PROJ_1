@@ -1,0 +1,128 @@
+db.createCollection("apartment", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["apartment_id"],
+      properties: {
+        apartment_id: {
+          bsonType: "int",
+          description: "must be an integer and is required"
+        },
+        area: {
+          bsonType: "float",
+          description: "must be a float"
+        },
+        creation_year: {
+          bsonType: "int",
+          description: "must be an integer"
+        },
+        last_renovation_year: {
+          bsonType: "int",
+          description: "must be an integer"
+        },
+        building_type: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        heating_type: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        is_furnished: {
+          bsonType: "bool",
+          description: "must be a boolean"
+        },
+        rooms_count: {
+          bsonType: "int",
+          description: "must be an integer"
+        }
+      }
+    }
+  }
+})
+
+db.createCollection("owner", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["owner_id"],
+      properties: {
+        owner_id: {
+          bsonType: "int",
+          description: "must be an integer and is required"
+        },
+        surname: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        phone_number: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        address: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        email_address: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        company_name: {
+          bsonType: "string",
+          description: "must be a string"
+        }
+      }
+    }
+  }
+})
+
+db.createCollection("offers", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["offer_id"],
+      properties: {
+        offer_id: {
+          bsonType: "int",
+          description: "must be an integer and is required"
+        },
+        address_city: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        address_street: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        price: {
+          bsonType: "float",
+          description: "must be a float"
+        },
+        title: {
+          bsonType: "string",
+          description: "must be a string"
+        },
+        area: {
+          bsonType: "float",
+          description: "must be a float"
+        },
+        owner_id: {
+          bsonType: "int",
+          description: "must be an integer"
+        },
+        apartment_id: {
+          bsonType: "int",
+          description: "must be an integer"
+        },
+        company_name: {
+          bsonType: "string",
+          description: "must be a string"
+        }
+      }
+    }
+  }
+})
+
+db.offers.createIndex({ address_city: 1, address_street: 1 })
+db.offers.createIndex({ address_city: 1, address_street: 1, price: 1 })
+db.offers.createIndex({ company_name: 1 })
