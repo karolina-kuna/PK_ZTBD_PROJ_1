@@ -10,9 +10,8 @@ cluster = Cluster()
 
 # Create an instance of the CassandraOwnerRepository
 repository = CassandraOwnerRepository(cluster)
-
 # Create the owner table
-repository.create_table()
+# repository.create_table()
 
 # Insert an owner
 owner = Owner(uuid.uuid4(), "Smith", "+1234567890", "123 Main St", "smith@example.com", "Real Estate LLC")

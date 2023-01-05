@@ -7,9 +7,9 @@ from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentI
     ApartmentPriceRangeQuery, ApartmentPriceRange, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
     ApartmentPriceByDistrict, ApartmentSaleOffersByStatusQuery, ApartmentSaleOffersByStatus, ApartmentSearchQuery, \
     ApartmentSearchResult, CompanyAndApartments
-from market_app.services.reader_manager import ReaderManager
+from market_app.services.reader_manager import ReaderManager, READER_MANAGER
 
-sales_router = APIRouter(prefix="/authors", tags=["Authors"])
+sales_router = APIRouter(prefix="/sales", tags=["Sales"])
 
 
 # 1.	Wyszukiwanie mieszkania do kupna po mieście i adresie
@@ -81,6 +81,6 @@ def search_apartments(query: ApartmentSearchQuery,
 
 # 10. Zwrócenie informacji o firmach i mieszkaniach oferowanych przez nie
 @sales_router.get("/companies/apartments")
-def get_companies_and_apartments(reader_manager: ReaderManager = Depends(
-    get_reader_manager)) -> t.List[CompanyAndApartments]:
+def get_companies_and_apartments() -> t.List[CompanyAndApartments]:
+    reader_manager: ReaderManager = READER_MANAGER
     return reader_manager.get_companies_and_apartments()

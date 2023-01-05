@@ -1,13 +1,22 @@
 import typing as t
 
+from cassandra.cluster import Cluster
+from fastapi import Depends
+
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult, \
     CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
     ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo
+from market_app.repositories.cassandra_owner_repository import CassandraOwnerRepository
+from market_app.repositories.repository_dependencies import get_cassandra_cluster, get_cassandra_owner_repository
 from market_app.services.reader_interface import ISalesReader
 
 
 class CassandraReader(ISalesReader):
+
+    def __init__(self):
+        self.cassandra_owner_repository = CassandraOwnerRepository(Cluster())
+
     def add_apartment_info(self, apartment_id: int, apartment_info: ApartmentInfo) -> None:
         pass
 
@@ -34,7 +43,7 @@ class CassandraReader(ISalesReader):
         pass
 
     def get_companies_and_apartments(self) -> t.List[CompanyAndApartments]:
-        pass
+        return self.cassandra_owner_repository.get_all()
 
     def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentForSaleSearchResult]:
         print("Cassandra called")

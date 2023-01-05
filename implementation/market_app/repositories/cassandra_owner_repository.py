@@ -19,7 +19,7 @@ class CassandraOwnerRepository:
 
     def insert(self, owner: Owner) -> Owner:
         query = SimpleStatement(
-            "INSERT INTO owner (owner_id, surname, phone_number, address, email_address, company_name) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO market_app.owner (owner_id, surname, phone_number, address, email_address, company_name) VALUES (%s, %s, %s, %s, %s, %s)",
             consistency_level=ConsistencyLevel.QUORUM
         )
         self.session.execute(query, (generate_uuid(), owner.surname, owner.phone_number, owner.address, owner.email_address, owner.company_name))
@@ -54,7 +54,7 @@ class CassandraOwnerRepository:
 
     def get_all(self) -> List[Owner]:
         query = SimpleStatement(
-            "SELECT * FROM owner",
+            "SELECT * FROM market_app.owner",
             consistency_level=ConsistencyLevel.QUORUM
         )
         rows = self.session.execute(query)
