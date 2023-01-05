@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import Optional, List
+from pydantic import BaseModel
 
 
-class ApartmentForSaleSearchQuery:
+class ApartmentForSaleSearchQuery(BaseModel):
     city: str
     address: str
 
 
-class SaleOffer:
+class SaleOffer(BaseModel):
     creation_date: datetime
     price: float
     is_negotiable: bool
@@ -17,7 +18,7 @@ class SaleOffer:
     agency_fee: Optional[float]
 
 
-class Address:
+class Address(BaseModel):
     street_name: str
     building_nr: str
     apartment_nr: str
@@ -25,7 +26,7 @@ class Address:
     city: str
 
 
-class Owner:
+class Owner(BaseModel):
     name: str
     surname: str
     phone_number: str
@@ -34,7 +35,7 @@ class Owner:
     company_name: Optional[str]
 
 
-class ApartmentInfo:
+class ApartmentInfo(BaseModel):
     area: float
     creation_year: int
     last_renovation_year: Optional[int]
@@ -46,7 +47,7 @@ class ApartmentInfo:
     owner: Owner
 
 
-class ApartmentForSaleSearchResult:
+class ApartmentForSaleSearchResult(BaseModel):
     id: int
     area: float
     creation_year: int
@@ -60,18 +61,18 @@ class ApartmentForSaleSearchResult:
     sale_offer: SaleOffer
 
 
-class ApartmentPriceRangeQuery:
+class ApartmentPriceRangeQuery(BaseModel):
     city: str
-    min_price: Optional[float]
-    max_price: Optional[float]
-
-
-class ApartmentPriceRange:
     min_price: float
     max_price: float
 
 
-class ApartmentUpdateInfo:
+class ApartmentPriceRange(BaseModel):
+    min_price: float
+    max_price: float
+
+
+class ApartmentUpdateInfo(BaseModel):
     area: Optional[float]
     creation_year: Optional[int]
     last_renovation_year: Optional[int]
@@ -82,36 +83,36 @@ class ApartmentUpdateInfo:
     address: Optional[Address]
 
 
-class SaleOfferStatusUpdate:
+class SaleOfferStatusUpdate(BaseModel):
     status: str
 
 
-class ApartmentPriceByDistrict:
+class ApartmentPriceByDistrict(BaseModel):
     district: str
     average_price: float
 
 
-class ApartmentSaleOffersByStatusQuery:
+class ApartmentSaleOffersByStatusQuery(BaseModel):
     company_name: Optional[str]
     status: Optional[str]
 
 
-class ApartmentSaleOffersByStatus:
+class ApartmentSaleOffersByStatus(BaseModel):
     company_name: str
     apartments: List[ApartmentInfo]
     status: str
 
 
-class ApartmentSearchQuery:
+class ApartmentSearchQuery(BaseModel):
     address: Optional[str]
     price: Optional[float]
 
 
-class ApartmentSearchResult:
+class ApartmentSearchResult(BaseModel):
     address: str
     price: float
 
 
-class CompanyAndApartments:
+class CompanyAndApartments(BaseModel):
     company_name: str
     apartments: List[ApartmentInfo]
