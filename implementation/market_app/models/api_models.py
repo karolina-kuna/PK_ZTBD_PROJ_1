@@ -2,16 +2,19 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel
 
+from market_app.models.db_models.cassandra_models import Apartment, Offer
+
 
 class ApartmentForSaleSearchQuery(BaseModel):
     city: str
-    address: str
+    street_name: str
 
 
 class SaleOffer(BaseModel):
     creation_date: datetime
     price: float
     is_negotiable: bool
+    title: str
     status: str
     modification_date: Optional[datetime]
     description: Optional[str]
@@ -19,6 +22,7 @@ class SaleOffer(BaseModel):
 
 
 class Address(BaseModel):
+    address_id: Optional[str]
     street_name: str
     building_nr: str
     apartment_nr: str
@@ -27,15 +31,17 @@ class Address(BaseModel):
 
 
 class Owner(BaseModel):
+    owner_id: Optional[str]
     name: str
     surname: str
     phone_number: str
-    address: Address
+    address: str
     email_address: str
     company_name: Optional[str]
 
 
 class ApartmentInfo(BaseModel):
+    int: Optional[str]
     area: float
     creation_year: int
     last_renovation_year: Optional[int]
@@ -43,22 +49,18 @@ class ApartmentInfo(BaseModel):
     heating_type: str
     furnished: bool
     rooms_count: int
-    address: Address
-    owner: Owner
+    address: Optional[Address]
+    owner: Optional[Owner]
 
 
 class ApartmentForSaleSearchResult(BaseModel):
-    id: int
-    area: float
-    creation_year: int
-    last_renovation_year: Optional[int]
-    building_type: str
-    heating_type: str
-    furnished: bool
-    rooms_count: int
-    address: Address
-    owner: Owner
-    sale_offer: SaleOffer
+    offer_id: str
+    city: str
+    street: str
+    price: float
+    is_negotiable: bool
+    title: str
+    status: str
 
 
 class ApartmentPriceRangeQuery(BaseModel):
@@ -116,3 +118,18 @@ class ApartmentSearchResult(BaseModel):
 class CompanyAndApartments(BaseModel):
     company_name: str
     apartments: List[ApartmentInfo]
+
+
+class FullApartment(BaseModel):
+    apartment: ApartmentInfo
+    owner: Owner
+    offers: List[SaleOffer]
+    address: Address
+
+
+class FullApartmentResponse:
+    def __init__(self, apartment: Apartment, owner: Owner, offers: List[Offer], address: Address):
+        self.apartment = apartment
+        self.owner = owner
+        self.offers = offers
+        self.address = address

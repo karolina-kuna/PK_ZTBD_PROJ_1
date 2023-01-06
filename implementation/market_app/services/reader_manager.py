@@ -3,15 +3,15 @@ import typing as t
 from market_app.models.api_models import CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, \
     ApartmentSaleOffersByStatusQuery, ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, \
     SaleOffer, ApartmentUpdateInfo, ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, \
-    ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult
+    ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult, FullApartment
 from market_app.services.reader_interface import ISalesReader
-from market_app.services.cassandra_reader import CassandraReader
+from market_app.services.cassandra_service import CassandraService
 from market_app.services.mongo_db_reader import MongoDbReader
 from market_app.services.reader_options import ReaderOptions
 import collections
 
 TYPE_TO_CLASS_MAP = collections.ChainMap(
-    {ReaderOptions.CASSANDRA: CassandraReader},
+    {ReaderOptions.CASSANDRA: CassandraService},
     {ReaderOptions.MONGO_DB: MongoDbReader}
 )
 
@@ -19,7 +19,7 @@ TYPE_TO_CLASS_MAP = collections.ChainMap(
 class ReaderManager(ISalesReader):
     def __init__(self, reader_type: ReaderOptions) -> None:
         self.reader_type = reader_type
-        self.cassandra_reader = CassandraReader()
+        self.cassandra_reader = CassandraService()
         self.mongo_reader = MongoDbReader()
         self.__resolve_reader()
         pass
@@ -27,8 +27,8 @@ class ReaderManager(ISalesReader):
     def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentForSaleSearchResult]:
         return self.current_reader.search_apartments_for_sale(query)
 
-    def add_apartment_info(self, apartment_id: int, apartment_info: ApartmentInfo) -> None:
-        return self.current_reader.add_apartment_info(apartment_id, apartment_info)
+    def create_apartment_with_dependencies(self, apartment: FullApartment) -> None:
+        return self.current_reader.create_apartment_with_dependencies(apartment)
 
     def get_apartment_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
         return self.current_reader.get_apartment_price_range(query)

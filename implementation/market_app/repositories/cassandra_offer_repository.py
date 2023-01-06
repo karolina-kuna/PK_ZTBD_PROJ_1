@@ -11,23 +11,20 @@ from market_app.repositories.uuid_util import convert_text_into_uuid, generate_u
 
 
 class CassandraOfferRepository:
-    def __init__(self, keyspace, table):
-        self.keyspace = keyspace
-        self.table = table
+    def __init__(self, cluster):
+        self.key_space = "market_app"
 
-        # Connect to the Cassandra cluster
-        self.cluster = Cluster()
-        self.session = self.cluster.connect(keyspace)
+        self.session = cluster.connect()
 
     def get_offers_by_city_and_address(self, city: str, address: str) -> List[Offer]:
-        query = "SELECT * FROM offers_by_city_and_street WHERE address_city = %s AND address_street = %s"
+        query = f"SELECT * FROM {self.key_space}.offers_by_city_and_street WHERE address_city = %s AND address_street = %s"
         rows = self.session.execute(query, (city, address))
         return self.__map_from_rows(rows);
 
     def get_offers_by_city_and_address_and_price_range(self, city: str, address: str, min_price: float,
                                                        max_price: float) -> List[Offer]:
         query = SimpleStatement(
-            "SELECT * FROM offers_by_city_and_street_and_price WHERE address_city=%s AND address_street=%s AND price>=%s AND price<=%s",
+            "SELERequest added ty_and_street_and_price WHERE address_city=%s AND address_street=%s AND price>=%s AND price<=%s",
             consistency_level=ConsistencyLevel.QUORUM
         )
         rows = self.session.execute(query, (city, address, min_price, max_price))
@@ -46,7 +43,9 @@ class CassandraOfferRepository:
         copied_offer = copy.copy(offer)
         copied_offer.offer_id = offer_id
         self.__insert_into_offers_by_city_and_address(copied_offer)
-        self.__insert_into_offers_by_company_name(copied_offer)
+
+        if copied_offer.company_name:
+            self.__insert_into_offers_by_company_name(copied_offer)
         self.__insert_into_offers_by_city_and_address_and_price(copied_offer)
         return copied_offer
 
@@ -106,19 +105,19 @@ class CassandraOfferRepository:
     def __map_from_rows(self, rows) -> List[Offer]:
         return [self.__map_from_row(row) for row in rows]
     # Example usage
-
-
-repository = CassandraOfferRepository("market_app", "offers_by_city_and_street")
-
-row = repository.get_offers_by_city_and_address('Kraków', 'Krakowska')
-
 #
-# # Insert a new row
-# repository.insert("New York", "123 Main St", 456, "New Offer", 1000, 500, 1, 2)
 #
-# # Update an existing row
-# repository.update(offer_id, "Updated Offer", 1500)
-
-offer = Offer("New York", "Fifth Avenue", '31f72b98-8b75-11ed-afb3-78b58af1d5d7', "Luxury apartment2", 1000000.0, 50.0,
-              1, 1, "MAIN_COMPANY")
-repository.update(offer)
+# repository = CassandraOfferRepository("market_app", "offers_by_city_and_street")
+#
+# row = repository.get_offers_by_city_and_address('Kraków', 'Krakowska')
+#
+# #
+# # # Insert a new row
+# # repository.insert("New York", "123 Main St", 456, "New Offer", 1000, 500, 1, 2)
+# #
+# # # Update an existing row
+# # repository.update(offer_id, "Updated Offer", 1500)
+#
+# offer = Offer("New York", "Fifth Avenue", '31f72b98-8b75-11ed-afb3-78b58af1d5d7', "Luxury apartment2", 1000000.0, 50.0,
+#               1, 1, "MAIN_COMPANY")
+# repository.update(offer)

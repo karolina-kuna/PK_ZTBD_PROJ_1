@@ -6,7 +6,7 @@ from market_app.dependencies import get_reader_manager
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentInfo, ApartmentForSaleSearchResult, \
     ApartmentPriceRangeQuery, ApartmentPriceRange, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
     ApartmentPriceByDistrict, ApartmentSaleOffersByStatusQuery, ApartmentSaleOffersByStatus, ApartmentSearchQuery, \
-    ApartmentSearchResult, CompanyAndApartments
+    ApartmentSearchResult, CompanyAndApartments, FullApartment
 from market_app.services.reader_manager import ReaderManager, READER_MANAGER
 
 sales_router = APIRouter(prefix="/sales", tags=["Sales"])
@@ -16,16 +16,19 @@ sales_router = APIRouter(prefix="/sales", tags=["Sales"])
 # a.	Pobranie szczegółów dotyczących mieszkania
 # b.	Pobranie szczegółów dotyczących właściciela
 @sales_router.get("/apartments/for-sale/search")
-def search_apartments_for_sale(query: ApartmentForSaleSearchQuery,
+def search_apartments_for_sale(city_name: str,
+                               street_name: str,
                                reader_manager: ReaderManager = Depends(get_reader_manager)
                                ) -> t.List[ApartmentForSaleSearchResult]:
-    return reader_manager.search_apartments_for_sale(query)
+    return reader_manager.search_apartments_for_sale(
+        ApartmentForSaleSearchQuery(city=city_name, street_name=street_name)
+    )
 
 
-@sales_router.post("/apartments")
-def add_apartment_info(apartment_id: int, apartment_info: ApartmentInfo,
-                       reader_manager: ReaderManager = Depends(get_reader_manager)) -> None:
-    reader_manager.add_apartment_info(apartment_info)
+@sales_router.post("/apartment-with-dependencies")
+def add_apartment_info(apartment: FullApartment) -> None:
+    reader_manager: ReaderManager = READER_MANAGER
+    reader_manager.create_apartment_with_dependencies(apartment)
 
 
 # 3.	Wyświetlenie informacji o przedziale informacjach cenowych w danej lokalizacji

@@ -4,7 +4,7 @@ import typing as t
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult, \
     CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, SaleOfferStatusUpdate, ApartmentUpdateInfo, ApartmentPriceRangeQuery, \
-    ApartmentPriceRange, ApartmentInfo, SaleOffer, ApartmentPriceByDistrict
+    ApartmentPriceRange, ApartmentInfo, SaleOffer, ApartmentPriceByDistrict, FullApartment
 
 
 class ISalesReader(ABC):
@@ -14,7 +14,7 @@ class ISalesReader(ABC):
         pass
 
     @abstractmethod
-    def add_apartment_info(self, apartment_id: int, apartment_info: ApartmentInfo) -> None:
+    def create_apartment_with_dependencies(self, full_apartment: FullApartment) -> None:
         pass
 
     @abstractmethod

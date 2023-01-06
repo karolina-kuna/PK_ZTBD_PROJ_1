@@ -3,12 +3,12 @@ import typing as t
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult, \
     CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
-    ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo
+    ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, FullApartment
 from market_app.services.reader_interface import ISalesReader
 
 
 class MongoDbReader(ISalesReader):
-    def add_apartment_info(self, apartment_id: int, apartment_info: ApartmentInfo) -> None:
+    def create_apartment_with_dependencies(self, apartment: FullApartment) -> None:
         pass
 
     def get_apartment_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
