@@ -3,7 +3,7 @@ import typing as t
 from fastapi import APIRouter, HTTPException, status, Depends
 
 from market_app.dependencies import get_reader_manager
-from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentInfo, ApartmentForSaleSearchResult, \
+from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentInfo, ApartmentOfferSearchResult, \
     ApartmentPriceRangeQuery, ApartmentPriceRange, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
     ApartmentPriceByDistrict, ApartmentSaleOffersByStatusQuery, ApartmentSaleOffersByStatus, ApartmentSearchQuery, \
     ApartmentSearchResult, CompanyAndApartments, FullApartment
@@ -18,8 +18,8 @@ sales_router = APIRouter(prefix="/sales", tags=["Sales"])
 @sales_router.get("/apartments/for-sale/search")
 def search_apartments_for_sale(city_name: str,
                                street_name: str,
-                               reader_manager: ReaderManager = Depends(get_reader_manager)
-                               ) -> t.List[ApartmentForSaleSearchResult]:
+                               ) -> t.List[ApartmentOfferSearchResult]:
+    reader_manager: ReaderManager = READER_MANAGER
     return reader_manager.search_apartments_for_sale(
         ApartmentForSaleSearchQuery(city=city_name, street_name=street_name)
     )
@@ -32,45 +32,44 @@ def add_apartment_info(apartment: FullApartment) -> None:
 
 
 # 3.	Wyświetlenie informacji o przedziale informacjach cenowych w danej lokalizacji
-@sales_router.get("/apartments/for-sale/prices")
-def get_apartment_price_range(query: ApartmentPriceRangeQuery,
-                              reader_manager: ReaderManager = Depends(get_reader_manager)) -> ApartmentPriceRange:
-    return reader_manager.get_apartment_price_range(query)
+@sales_router.get("/apartments/sale-offers/by-price-range")
+def get_apartment_price_range(city: str, min_price: float, max_price: float) -> t.List[ApartmentOfferSearchResult]:
+    query = ApartmentPriceRangeQuery(city=city, min_price=min_price, max_price=max_price)
+    reader_manager: ReaderManager = READER_MANAGER
+    return reader_manager.get_offers_by_city_and_price_range(query)
 
 
 # 4. Usunięcie oferty sprzedaży mieszkania
 @sales_router.delete("/apartments/sale-offers/{offer_id}")
-def delete_apartment_sale_offer(offer_id: int,
-                                reader_manager: ReaderManager = Depends(get_reader_manager)) -> None:
+def delete_apartment_sale_offer(offer_id: str) -> None:
+    reader_manager: ReaderManager = READER_MANAGER
     reader_manager.delete_apartment_sale_offer(offer_id)
 
 
 # 5. Zmiana danych mieszkania
 @sales_router.patch("/apartments/{apartment_id}")
-def update_apartment(apartment_id: int, update_info: ApartmentUpdateInfo,
-                     reader_manager: ReaderManager = Depends(get_reader_manager)) -> None:
+def update_apartment(apartment_id: int, update_info: ApartmentUpdateInfo) -> None:
+    reader_manager: ReaderManager = READER_MANAGER
     reader_manager.update_apartment(apartment_id, update_info)
 
 
 # 6. Zmiana statusu oferty kupna
 @sales_router.patch("/apartments/sale-offers/{offer_id}/status")
-def update_sale_offer_status(offer_id: int, update_info: SaleOfferStatusUpdate,
-                             reader_manager: ReaderManager = Depends(get_reader_manager)) -> SaleOffer:
+def update_sale_offer_status(offer_id: int, update_info: SaleOfferStatusUpdate) -> SaleOffer:
+    reader_manager: ReaderManager = READER_MANAGER
     reader_manager.update_sale_offer_status(offer_id, update_info)
 
 
 # 7. Wyszukanie średnich cen mieszkań na metr kwadratowy po dzielnicy
-def get_average_apartment_prices_by_city_and_street(city: str, street_name: str,
-                                                    reader_manager: ReaderManager = Depends(
-                                                        get_reader_manager)) -> ApartmentPriceByDistrict:
+def get_average_apartment_prices_by_city_and_street(city: str, street_name: str) -> ApartmentPriceByDistrict:
+    reader_manager: ReaderManager = READER_MANAGER
     return reader_manager.get_average_apartment_prices_by_city_and_street(city, street_name)
 
 
 # 8. Grupowanie mieszkań na sprzedaż w zależności od statusu dla poszczególnych firm
 @sales_router.get("/apartments/sale-offers/statuses")
-def get_apartment_sale_offers_by_status(query: ApartmentSaleOffersByStatusQuery,
-                                        reader_manager: ReaderManager = Depends(
-                                            get_reader_manager)) -> t.List[ApartmentSaleOffersByStatus]:
+def get_apartment_sale_offers_by_status(query: ApartmentSaleOffersByStatusQuery) -> t.List[ApartmentSaleOffersByStatus]:
+    reader_manager: ReaderManager = READER_MANAGER
     return reader_manager.get_apartment_sale_offers_by_status(query)
 
 

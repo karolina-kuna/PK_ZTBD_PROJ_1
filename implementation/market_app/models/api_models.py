@@ -53,8 +53,9 @@ class ApartmentInfo(BaseModel):
     owner: Optional[Owner]
 
 
-class ApartmentForSaleSearchResult(BaseModel):
+class ApartmentOfferSearchResult(BaseModel):
     offer_id: str
+    apartment_id: str
     city: str
     street: str
     price: float

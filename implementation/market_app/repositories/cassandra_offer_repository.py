@@ -3,31 +3,38 @@ import copy
 from typing import List
 
 from cassandra import ConsistencyLevel
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, Session
 from cassandra.query import SimpleStatement
 
 from market_app.models.db_models.cassandra_models import Offer, Apartment, Owner
-from market_app.repositories.uuid_util import convert_text_into_uuid, generate_uuid
+from market_app.repositories.uuid_util import convert_text_into_uuid, generate_uuid, convert_uuid_into_text
 
 
 class CassandraOfferRepository:
-    def __init__(self, cluster):
+    def __init__(self, session: Session):
+        self.session = session
         self.key_space = "market_app"
-
-        self.session = cluster.connect()
 
     def get_offers_by_city_and_address(self, city: str, address: str) -> List[Offer]:
         query = f"SELECT * FROM {self.key_space}.offers_by_city_and_street WHERE address_city = %s AND address_street = %s"
         rows = self.session.execute(query, (city, address))
         return self.__map_from_rows(rows);
 
-    def get_offers_by_city_and_address_and_price_range(self, city: str, address: str, min_price: float,
+    def get_offers_by_city_and_address_and_price_range(self, city: str, city_street: str, min_price: float,
                                                        max_price: float) -> List[Offer]:
         query = SimpleStatement(
-            "SELERequest added ty_and_street_and_price WHERE address_city=%s AND address_street=%s AND price>=%s AND price<=%s",
+            f"SELECT * FROM {self.key_space}.offers_by_city_and_street_and_price WHERE address_city=%s AND address_street=%s AND price>=%s AND price<=%s",
             consistency_level=ConsistencyLevel.QUORUM
         )
-        rows = self.session.execute(query, (city, address, min_price, max_price))
+        rows = self.session.execute(query, (city, city_street, min_price, max_price))
+        return self.__map_from_rows(rows)
+
+    def get_offers_by_city_and_price_range(self, city: str, min_price: float, max_price: float) -> List[Offer]:
+        query = SimpleStatement(
+            f"SELECT * FROM {self.key_space}.offers_by_city_and_price WHERE address_city=%s AND price>=%s AND price<=%s",
+            consistency_level=ConsistencyLevel.QUORUM
+        )
+        rows = self.session.execute(query, (city, min_price, max_price))
         return self.__map_from_rows(rows)
 
     def get_offers_by_company_name(self, company_name: str) -> List[Offer]:
@@ -37,6 +44,26 @@ class CassandraOfferRepository:
         )
         rows = self.session.execute(query, company_name)
         return self.__map_from_rows(rows)
+
+    def delete(self, offer_id: str):
+        query = SimpleStatement(
+            "DELETE FROM offers_by_company_name WHERE offer_id=%s",
+            consistency_level=ConsistencyLevel.QUORUM
+        )
+        offer_id_uuid = convert_text_into_uuid(offer_id)
+        self.session.execute(query, (offer_id_uuid,))
+
+        query = SimpleStatement(
+            "DELETE FROM offers_by_city_and_street WHERE offer_id=%s",
+            consistency_level=ConsistencyLevel.QUORUM
+        )
+        self.session.execute(query, offer_id_uuid)
+
+        query = SimpleStatement(
+            "DELETE FROM offers_by_city_and_street_and_price WHERE offer_id=%s",
+            consistency_level=ConsistencyLevel.QUORUM
+        )
+        self.session.execute(query, offer_id_uuid)
 
     def insert(self, offer: Offer) -> Offer:
         offer_id = generate_uuid()
@@ -93,7 +120,7 @@ class CassandraOfferRepository:
     def __map_from_row(self, single_row) -> Offer:
         return Offer(single_row.address_city,
                      single_row.address_street,
-                     single_row.offer_id,
+                     convert_uuid_into_text(single_row.offer_id),
                      single_row.title,
                      single_row.price,
                      single_row.area,

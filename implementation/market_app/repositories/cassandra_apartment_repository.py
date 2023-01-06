@@ -1,7 +1,7 @@
 from typing import List
 
 from cassandra import ConsistencyLevel
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, Session
 from cassandra.query import SimpleStatement
 
 from market_app.models.db_models.cassandra_models import Apartment
@@ -9,9 +9,9 @@ from market_app.repositories.uuid_util import convert_uuid_into_text, convert_te
 
 
 class CassandraApartmentRepository:
-    def __init__(self, cluster: Cluster):
+    def __init__(self, session: Session):
+        self.session = session
         self.key_space = "market_app"
-        self.session = cluster.connect(self.key_space)
 
     def create_table(self):
         query = "CREATE TABLE IF NOT EXISTS apartment (apartment_id uuid PRIMARY KEY, area int, creation_year int, last_renovation_year int, building_type text, heating_type text, is_furnished boolean, rooms_count int, owner_id: text, address_id: text)"

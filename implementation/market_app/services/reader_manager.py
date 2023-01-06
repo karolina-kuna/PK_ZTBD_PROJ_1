@@ -3,7 +3,7 @@ import typing as t
 from market_app.models.api_models import CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, \
     ApartmentSaleOffersByStatusQuery, ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, \
     SaleOffer, ApartmentUpdateInfo, ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, \
-    ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult, FullApartment
+    ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, FullApartment
 from market_app.services.reader_interface import ISalesReader
 from market_app.services.cassandra_service import CassandraService
 from market_app.services.mongo_db_reader import MongoDbReader
@@ -24,16 +24,16 @@ class ReaderManager(ISalesReader):
         self.__resolve_reader()
         pass
 
-    def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentForSaleSearchResult]:
+    def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentOfferSearchResult]:
         return self.current_reader.search_apartments_for_sale(query)
 
     def create_apartment_with_dependencies(self, apartment: FullApartment) -> None:
         return self.current_reader.create_apartment_with_dependencies(apartment)
 
-    def get_apartment_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
-        return self.current_reader.get_apartment_price_range(query)
+    def get_offers_by_city_and_price_range(self, query: ApartmentPriceRangeQuery) -> t.List[ApartmentOfferSearchResult]:
+        return self.current_reader.get_offers_by_city_and_price_range(query)
 
-    def delete_apartment_sale_offer(self, offer_id: int) -> None:
+    def delete_apartment_sale_offer(self, offer_id: str) -> None:
         return self.current_reader.delete_apartment_sale_offer(offer_id)
 
     def update_apartment(self, apartment_id: int, update_info: ApartmentUpdateInfo) -> None:

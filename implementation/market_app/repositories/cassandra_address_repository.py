@@ -2,7 +2,7 @@ import uuid
 from typing import List
 
 from cassandra import ConsistencyLevel
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, Session
 from cassandra.query import SimpleStatement
 
 from market_app.models.db_models.cassandra_models import Address
@@ -10,8 +10,8 @@ from market_app.repositories.uuid_util import generate_uuid, convert_text_into_u
 
 
 class CassandraAddressRepository:
-    def __init__(self, cluster: Cluster):
-        self.session = cluster.connect()
+    def __init__(self, session: Session):
+        self.session = session
         self.key_space = "market_app"
 
     def create_table(self):

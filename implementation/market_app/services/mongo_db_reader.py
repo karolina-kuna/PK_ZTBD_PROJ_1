@@ -1,6 +1,6 @@
 import typing as t
 
-from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult, \
+from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
     CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
     ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, FullApartment
@@ -11,10 +11,10 @@ class MongoDbReader(ISalesReader):
     def create_apartment_with_dependencies(self, apartment: FullApartment) -> None:
         pass
 
-    def get_apartment_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
+    def get_offers_by_city_and_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
         pass
 
-    def delete_apartment_sale_offer(self, apartment_id: int) -> None:
+    def delete_apartment_sale_offer(self, offer_id: str) -> None:
         pass
 
     def update_apartment(self, apartment_id: int, update_info: ApartmentUpdateInfo) -> None:
@@ -36,6 +36,6 @@ class MongoDbReader(ISalesReader):
     def get_companies_and_apartments(self) -> t.List[CompanyAndApartments]:
         pass
 
-    def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentForSaleSearchResult]:
+    def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentOfferSearchResult]:
         print("Mongo Called")
         pass

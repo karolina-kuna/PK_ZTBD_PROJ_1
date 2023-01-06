@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from market_app.models.api_models import ApartmentInfo, SaleOffer, ApartmentForSaleSearchResult
+from market_app.models.api_models import ApartmentInfo, SaleOffer, ApartmentOfferSearchResult
 from market_app.models.db_models.cassandra_models import Apartment, Offer, Address, Owner
 
 
@@ -69,9 +69,10 @@ class CassandraMapper:
         )
 
     @staticmethod
-    def map_offer_to_apartment_for_sale_result(offer: Offer) -> ApartmentForSaleSearchResult:
-        return ApartmentForSaleSearchResult(
+    def map_offer_to_apartment_for_sale_result(offer: Offer) -> ApartmentOfferSearchResult:
+        return ApartmentOfferSearchResult(
             offer_id=offer.offer_id,
+            apartment_id=offer.apartment_id,
             city=offer.address_city,
             street=offer.address_street,
             price=offer.price,

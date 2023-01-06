@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import typing as t
 
-from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentForSaleSearchResult, \
+from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
     CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, SaleOfferStatusUpdate, ApartmentUpdateInfo, ApartmentPriceRangeQuery, \
     ApartmentPriceRange, ApartmentInfo, SaleOffer, ApartmentPriceByDistrict, FullApartment
@@ -10,7 +10,7 @@ from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentF
 class ISalesReader(ABC):
 
     @abstractmethod
-    def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentForSaleSearchResult]:
+    def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentOfferSearchResult]:
         pass
 
     @abstractmethod
@@ -18,11 +18,11 @@ class ISalesReader(ABC):
         pass
 
     @abstractmethod
-    def get_apartment_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
+    def get_offers_by_city_and_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
         pass
 
     @abstractmethod
-    def delete_apartment_sale_offer(self, apartment_id: int) -> None:
+    def delete_apartment_sale_offer(self, offer_id: str) -> None:
         pass
 
     @abstractmethod
