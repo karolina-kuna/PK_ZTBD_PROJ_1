@@ -20,12 +20,13 @@ class CassandraOwnerRepository:
 
     def insert(self, owner: Owner) -> Owner:
         query = SimpleStatement(
-            f"INSERT INTO {self.key_space}.owner (owner_id, surname, phone_number, address, email_address, company_name) VALUES (%s, %s, %s, %s, %s, %s)",
+            f"INSERT INTO {self.key_space}.owner (owner_id, name, surname, phone_number, address, email_address, company_name) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             consistency_level=ConsistencyLevel.QUORUM
         )
         owner_id = generate_uuid()
         self.session.execute(query, (
-            owner_id, owner.surname, owner.phone_number, owner.address, owner.email_address, owner.company_name))
+            owner_id, owner.name, owner.surname, owner.phone_number, owner.address, owner.email_address,
+            owner.company_name))
         owner.owner_id = convert_uuid_into_text(owner_id)
         return owner
 
@@ -48,13 +49,17 @@ class CassandraOwnerRepository:
         self.session.execute(query, owner_id_uuid)
         return True
 
-    def get_by_id(self, owner_id: uuid) -> Owner:
+    def get_by_id(self, owner_id: uuid) -> Owner | None:
         query = SimpleStatement(
             f"SELECT * FROM {self.key_space}.owner WHERE owner_id=%s",
             consistency_level=ConsistencyLevel.QUORUM
         )
-        owner_id_uuid = convert_text_into_uuid(owner_id)
-        row = self.session.execute(query, owner_id_uuid).one()
+        try:
+            owner_id_uuid = convert_text_into_uuid(owner_id)
+        except Exception:
+            return None
+
+        row = self.session.execute(query, (owner_id_uuid,)).one()
         return self.__map_row_to_owner(row)
 
     def get_all(self) -> List[Owner]:
@@ -66,5 +71,5 @@ class CassandraOwnerRepository:
         return [self.__map_row_to_owner(row) for row in rows]
 
     def __map_row_to_owner(self, row) -> Owner:
-        return Owner(convert_uuid_into_text(row.owner_id), row.surname, row.name, row.phone_number, row.address,
+        return Owner(convert_uuid_into_text(row.owner_id), row.name, row.surname, row.phone_number, row.address,
                      row.email_address, row.company_name)

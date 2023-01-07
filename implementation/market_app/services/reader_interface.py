@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 import typing as t
 
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
-    CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
+    CompanyAndApartments, ApartmentSearchQuery, ApartmentOfferAveragePrice, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, SaleOfferStatusUpdate, ApartmentUpdateInfo, ApartmentPriceRangeQuery, \
-    ApartmentPriceRange, ApartmentInfo, SaleOffer, ApartmentPriceByDistrict, FullApartment
+    ApartmentPriceRange, ApartmentInfo, SaleOffer, ApartmentPriceByDistrict, FullApartment, OwnerApiModel, \
+    CompanyStatisticResult
 
 
 class ISalesReader(ABC):
@@ -26,7 +27,7 @@ class ISalesReader(ABC):
         pass
 
     @abstractmethod
-    def update_apartment(self, apartment_id: int, update_info: ApartmentUpdateInfo) -> None:
+    def update_apartment(self, apartment_id: str, update_info: ApartmentUpdateInfo) -> ApartmentInfo:
         pass
 
     @abstractmethod
@@ -34,17 +35,17 @@ class ISalesReader(ABC):
         pass
 
     @abstractmethod
-    def get_average_apartment_prices_by_city_and_street(self, city: str, street_name: str) -> ApartmentPriceByDistrict:
+    def get_average_apartment_prices_by_city(self, city: str) -> t.List[ApartmentOfferAveragePrice]:
         pass
 
     @abstractmethod
-    def get_apartment_sale_offers_by_status(self, query: ApartmentSaleOffersByStatusQuery) -> t.List[ApartmentSaleOffersByStatus]:
+    def get_companies_sales_statistics(self, company_name: str) -> t.List[CompanyStatisticResult]:
         pass
 
     @abstractmethod
-    def search_apartments(self, query: ApartmentSearchQuery) -> t.List[ApartmentSearchResult]:
+    def find_apartment_by_id(self, apartment_id: str) -> ApartmentInfo:
         pass
 
     @abstractmethod
-    def get_companies_and_apartments(self) -> t.List[CompanyAndApartments]:
+    def get_owner_by_id(self, owner_id: str) -> OwnerApiModel:
         pass

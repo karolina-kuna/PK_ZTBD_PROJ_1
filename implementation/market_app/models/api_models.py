@@ -30,7 +30,7 @@ class Address(BaseModel):
     city: str
 
 
-class Owner(BaseModel):
+class OwnerApiModel(BaseModel):
     owner_id: Optional[str]
     name: str
     surname: str
@@ -41,7 +41,7 @@ class Owner(BaseModel):
 
 
 class ApartmentInfo(BaseModel):
-    int: Optional[str]
+    apartment_id: str
     area: float
     creation_year: int
     last_renovation_year: Optional[int]
@@ -49,8 +49,10 @@ class ApartmentInfo(BaseModel):
     heating_type: str
     furnished: bool
     rooms_count: int
+    address_id: str
     address: Optional[Address]
-    owner: Optional[Owner]
+    owner_id: str
+    owner: Optional[OwnerApiModel]
 
 
 class ApartmentOfferSearchResult(BaseModel):
@@ -83,7 +85,8 @@ class ApartmentUpdateInfo(BaseModel):
     heating_type: Optional[str]
     furnished: Optional[bool]
     rooms_count: Optional[int]
-    address: Optional[Address]
+    address_id: Optional[str]
+    owner_id: Optional[str]
 
 
 class SaleOfferStatusUpdate(BaseModel):
@@ -111,9 +114,17 @@ class ApartmentSearchQuery(BaseModel):
     price: Optional[float]
 
 
-class ApartmentSearchResult(BaseModel):
-    address: str
-    price: float
+class ApartmentOfferAveragePrice(BaseModel):
+    city: str
+    avg_price: float
+    avg_price_per_m2: float
+
+
+class CompanyStatisticResult(BaseModel):
+    company_name: str
+    avg_price: float
+    avg_price_per_m2: float
+    sales_offer_count: int
 
 
 class CompanyAndApartments(BaseModel):
@@ -123,13 +134,13 @@ class CompanyAndApartments(BaseModel):
 
 class FullApartment(BaseModel):
     apartment: ApartmentInfo
-    owner: Owner
+    owner: OwnerApiModel
     offers: List[SaleOffer]
     address: Address
 
 
 class FullApartmentResponse:
-    def __init__(self, apartment: Apartment, owner: Owner, offers: List[Offer], address: Address):
+    def __init__(self, apartment: Apartment, owner: OwnerApiModel, offers: List[Offer], address: Address):
         self.apartment = apartment
         self.owner = owner
         self.offers = offers

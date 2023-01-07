@@ -3,20 +3,22 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from market_app.models.api_models import ApartmentInfo, Address, Owner, SaleOffer, FullApartment
+from market_app.models.api_models import ApartmentInfo, Address, OwnerApiModel, SaleOffer, FullApartment
 from market_app.services.cassandra_service import CassandraService
 
 
 def generate_random_apartment_info():
     return ApartmentInfo(
-        id=str(random.randint(10000, 99999)),
+        apartment_id=str(random.randint(10000, 99999)),
         area=random.uniform(20, 200),
         creation_year=random.randint(1900, 2021),
         last_renovation_year=random.randint(1900, 2021),
         building_type=random.choice(['apartment building', 'single-family home', 'townhouse']),
         heating_type=random.choice(['central', 'electric', 'gas']),
         furnished=random.choice([True, False]),
-        rooms_count=random.randint(1, 10)
+        rooms_count=random.randint(1, 10),
+        owner_id=2,
+        address_id=2
     )
 
 
@@ -45,7 +47,7 @@ def generate_random_owner():
     email_address = f"{name.lower()}.{surname.lower()}@{random.choice(email_providers)}"
     company_name = None if random.random() > 0.5 else f"{name}'s Company"
 
-    return Owner(
+    return OwnerApiModel(
         id="",
         name=name,
         surname=surname,
@@ -80,6 +82,8 @@ def generate_random_full_apartment(sales_size):
 
 if __name__ == "__main__":
     cassandra_service = CassandraService()
-    full_apartment = generate_random_full_apartment(1)
-    result = cassandra_service.create_apartment_with_dependencies(full_apartment)
+
+    for idx in range(31):
+        full_apartment = generate_random_full_apartment(random.randint(1, 6))
+        result = cassandra_service.create_apartment_with_dependencies(full_apartment)
     print("Zapisano :O")

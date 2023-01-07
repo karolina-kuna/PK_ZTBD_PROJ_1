@@ -1,9 +1,9 @@
 import typing as t
 
-from market_app.models.api_models import CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, \
+from market_app.models.api_models import CompanyAndApartments, ApartmentSearchQuery, ApartmentOfferAveragePrice, \
     ApartmentSaleOffersByStatusQuery, ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, \
     SaleOffer, ApartmentUpdateInfo, ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, \
-    ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, FullApartment
+    ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, FullApartment, OwnerApiModel, CompanyStatisticResult
 from market_app.services.reader_interface import ISalesReader
 from market_app.services.cassandra_service import CassandraService
 from market_app.services.mongo_db_reader import MongoDbReader
@@ -36,24 +36,23 @@ class ReaderManager(ISalesReader):
     def delete_apartment_sale_offer(self, offer_id: str) -> None:
         return self.current_reader.delete_apartment_sale_offer(offer_id)
 
-    def update_apartment(self, apartment_id: int, update_info: ApartmentUpdateInfo) -> None:
+    def update_apartment(self, apartment_id: str, update_info: ApartmentUpdateInfo) -> ApartmentInfo:
         return self.current_reader.update_apartment(apartment_id, update_info)
 
-    def update_sale_offer_status(self, offer_id: int, update_info: SaleOfferStatusUpdate) -> SaleOffer:
+    def update_sale_offer_status(self, offer_id: str, update_info: SaleOfferStatusUpdate) -> SaleOffer:
         return self.current_reader.update_sale_offer_status(offer_id, update_info)
 
-    def get_average_apartment_prices_by_city_and_street(self, city: str, street_name: str) -> ApartmentPriceByDistrict:
-        return self.current_reader.get_average_apartment_prices_by_city_and_street(city, street_name)
+    def get_average_apartment_prices_by_city(self, city: str) -> t.List[ApartmentOfferAveragePrice]:
+        return self.current_reader.get_average_apartment_prices_by_city(city)
 
-    def get_apartment_sale_offers_by_status(self, query: ApartmentSaleOffersByStatusQuery) -> t.List[
-        ApartmentSaleOffersByStatus]:
-        return self.current_reader.get_apartment_sale_offers_by_status(query)
+    def get_companies_sales_statistics(self, company_name: str) -> t.List[CompanyStatisticResult]:
+        return self.current_reader.get_companies_sales_statistics(company_name)
 
-    def search_apartments(self, query: ApartmentSearchQuery) -> t.List[ApartmentSearchResult]:
-        return self.current_reader.search_apartments(query)
+    def find_apartment_by_id(self, apartment_id: str) -> ApartmentInfo:
+        return self.current_reader.find_apartment_by_id(apartment_id)
 
-    def get_companies_and_apartments(self) -> t.List[CompanyAndApartments]:
-        return self.current_reader.get_companies_and_apartments()
+    def get_owner_by_id(self, owner_id: str) -> OwnerApiModel:
+        return self.current_reader.get_owner_by_id(owner_id)
 
     def __resolve_reader(self):
         if self.reader_type == ReaderOptions.CASSANDRA:

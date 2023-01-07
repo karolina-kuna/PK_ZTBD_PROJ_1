@@ -1,12 +1,13 @@
 import typing as t
 
 from cassandra.cluster import Cluster
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
-    CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
+    CompanyAndApartments, ApartmentSearchQuery, ApartmentOfferAveragePrice, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
-    ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, FullApartment, FullApartmentResponse
+    ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, FullApartment, FullApartmentResponse, OwnerApiModel, \
+    CompanyStatisticResult
 from market_app.models.db_models.cassandra_models import Apartment, Offer
 from market_app.repositories.cassandra_address_repository import CassandraAddressRepository
 from market_app.repositories.cassandra_apartment_repository import CassandraApartmentRepository
@@ -69,24 +70,50 @@ class CassandraService(ISalesReader):
     def delete_apartment_sale_offer(self, offer_id: str) -> None:
         self.cassandra_offer_repository.delete(offer_id)
 
-    def update_apartment(self, apartment_id: int, update_info: ApartmentUpdateInfo) -> None:
-        pass
+    def update_apartment(self, apartment_id: str, update_info: ApartmentUpdateInfo) -> ApartmentInfo:
+        curr_apartment = self.cassandra_apartment_repository.get_by_id(apartment_id)
+        if not curr_apartment:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f'Apartment with id: {apartment_id} couldn\'t be found')
 
-    def update_sale_offer_status(self, offer_id: int, update_info: SaleOfferStatusUpdate) -> SaleOffer:
-        pass
+        updated_apartment = CassandraMapper.apartment_update_to_apartment(update_info, curr_apartment)
+        self.cassandra_apartment_repository.update(updated_apartment)
+        print(updated_apartment.apartment_id)
+        return CassandraMapper.apartment_to_apartment_info(updated_apartment)
 
-    def get_average_apartment_prices_by_city_and_street(self, city: str, street_name: str) -> ApartmentPriceByDistrict:
-        pass
+    def update_sale_offer_status(self, offer_id: str, update_info: SaleOfferStatusUpdate) -> SaleOffer:
+        offer_basic = self.cassandra_offer_repository.get_offer_basic_by_id(offer_id)
+        if not offer_basic:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f'Offer with id: {offer_id} couldn\'t be found')
+        offer_full = self.cassandra_offer_repository.get_offers_by_city_and_price_and_id(offer_basic.address_city,
+                                                                                         offer_basic.price,
+                                                                                         offer_basic.offer_id)
+        offer_full.status = update_info.status
+        self.cassandra_offer_repository.update(offer_full)
+        return CassandraMapper.map_offer_to_api_model(offer_full)
 
-    def get_apartment_sale_offers_by_status(self, query: ApartmentSaleOffersByStatusQuery) -> t.List[
-        ApartmentSaleOffersByStatus]:
-        pass
+    def get_average_apartment_prices_by_city(self, city: str) -> t.List[ApartmentOfferAveragePrice]:
+        return self.cassandra_offer_repository.get_average_price_by_city(city)
 
-    def search_apartments(self, query: ApartmentSearchQuery) -> t.List[ApartmentSearchResult]:
-        pass
+    def get_companies_sales_statistics(self, company_name: str) -> t.List[CompanyStatisticResult]:
+        return self.cassandra_offer_repository.get_statistic_by_company(company_name)
 
-    def get_companies_and_apartments(self) -> t.List[CompanyAndApartments]:
-        return self.cassandra_owner_repository.get_all()
+    def find_apartment_by_id(self, apartment_id: str) -> ApartmentInfo:
+        apartment = self.cassandra_apartment_repository.get_by_id(apartment_id)
+        if not apartment:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f'Apartment with id: {apartment_id} couldn\'t be found')
+
+        return CassandraMapper.apartment_to_apartment_info(apartment)
+
+    def get_owner_by_id(self, owner_id: str) -> OwnerApiModel:
+        owner = self.cassandra_owner_repository.get_by_id(owner_id)
+        if not owner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f'Owner with id: {owner_id} couldn\'t be found')
+
+        return CassandraMapper.map_owner_to_api_model(owner)
 
     def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentOfferSearchResult]:
         offers: t.List[Offer] = self.cassandra_offer_repository.get_offers_by_city_and_address(query.city,

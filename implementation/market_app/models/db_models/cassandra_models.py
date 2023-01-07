@@ -5,6 +5,7 @@ class Offer:
                  title: str,
                  price: float,
                  area: float,
+                 status: str,
                  owner_id: str,
                  apartment_id: str,
                  company_name: str):
@@ -14,6 +15,7 @@ class Offer:
         self.title = title
         self.price = price
         self.area = area
+        self.status = status
         self.owner_id = owner_id
         self.apartment_id = apartment_id
         self.company_name = company_name

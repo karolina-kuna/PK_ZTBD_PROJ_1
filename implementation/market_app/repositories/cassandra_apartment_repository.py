@@ -51,12 +51,19 @@ class CassandraApartmentRepository:
         apartment_id_uuid = convert_text_into_uuid(apartment_id)
         self.session.execute(query, apartment_id_uuid)
 
-    def get_by_id(self, apartment_id: str) -> Apartment:
+    def get_by_id(self, apartment_id: str) -> Apartment | None:
+        try:
+            apartment_uuid = convert_text_into_uuid(apartment_id)
+        except Exception:
+            return None
+
         query = SimpleStatement(
             "SELECT * FROM apartment WHERE apartment_id=%s",
             consistency_level=ConsistencyLevel.QUORUM
         )
-        row = self.session.execute(query, convert_text_into_uuid(apartment_id)).one()
+        row = self.session.execute(query, (apartment_uuid,)).one()
+        if not row:
+            return None
         return self.__map_row_to_apartment(row)
 
     def get_all(self) -> List[Apartment]:

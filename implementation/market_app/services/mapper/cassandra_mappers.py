@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List
 
-from market_app.models.api_models import ApartmentInfo, SaleOffer, ApartmentOfferSearchResult
+from market_app.models.api_models import ApartmentInfo, SaleOffer, ApartmentOfferSearchResult, ApartmentUpdateInfo, \
+    OwnerApiModel
 from market_app.models.db_models.cassandra_models import Apartment, Offer, Address, Owner
 
 
@@ -33,11 +34,12 @@ class CassandraMapper:
             area=apartment.area,
             owner_id=owner.owner_id,
             apartment_id=apartment.apartment_id,
-            company_name=owner.company_name
+            company_name=owner.company_name,
+            status=sales_offer.status
         )
 
     @staticmethod
-    def apartment_to_apartment_info(apartment: Apartment):
+    def apartment_to_apartment_info(apartment: Apartment) -> ApartmentInfo:
         return ApartmentInfo(
             apartment_id=apartment.apartment_id,
             area=apartment.area,
@@ -46,7 +48,24 @@ class CassandraMapper:
             building_type=apartment.building_type,
             heating_type=apartment.heating_type,
             furnished=apartment.is_furnished,
-            rooms_count=apartment.rooms_count
+            rooms_count=apartment.rooms_count,
+            owner_id=apartment.owner_id,
+            address_id=apartment.address_id
+        )
+
+    @staticmethod
+    def apartment_update_to_apartment(apartment_update: ApartmentUpdateInfo, apartment: Apartment):
+        return Apartment(
+            apartment_id=apartment.apartment_id,
+            area=apartment_update.area if apartment_update.area else apartment.area,
+            creation_year=apartment_update.creation_year if apartment_update.creation_year else apartment.creation_year,
+            last_renovation_year=apartment_update.last_renovation_year if apartment_update.last_renovation_year else apartment.last_renovation_year,
+            building_type=apartment_update.building_type if apartment_update.building_type else apartment.building_type,
+            heating_type=apartment_update.heating_type if apartment_update.heating_type else apartment.heating_type,
+            is_furnished=apartment_update.furnished if apartment_update.furnished else apartment.is_furnished,
+            rooms_count=apartment_update.rooms_count if apartment_update.rooms_count else apartment.rooms_count,
+            owner_id=apartment_update.owner_id if apartment_update.owner_id else apartment.owner_id,
+            address_id=apartment_update.address_id if apartment_update.address_id else apartment.address_id
         )
 
     # TODO - dodać do modelu BD reszte info
@@ -62,10 +81,22 @@ class CassandraMapper:
             price=offer.price,
             is_negotiable=False,
             title=offer.title,
-            status='active',
+            status=offer.status,
             modification_date=None,
             description=None,
             agency_fee=None
+        )
+
+    @staticmethod
+    def map_owner_to_api_model(owner: Owner) -> OwnerApiModel:
+        return OwnerApiModel(
+            owner_id=owner.owner_id,
+            name=owner.name,
+            surname=owner.surname,
+            phone_number=owner.phone_number,
+            address=owner.address,
+            email_address=owner.email_address,
+            company_name=owner.company_name
         )
 
     @staticmethod
@@ -78,5 +109,5 @@ class CassandraMapper:
             price=offer.price,
             is_negotiable=False,
             title=offer.title,
-            status="active"
+            status=offer.status
         )

@@ -1,9 +1,9 @@
 import typing as t
 
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
-    CompanyAndApartments, ApartmentSearchQuery, ApartmentSearchResult, ApartmentSaleOffersByStatusQuery, \
+    CompanyAndApartments, ApartmentSearchQuery, ApartmentOfferAveragePrice, ApartmentSaleOffersByStatusQuery, \
     ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
-    ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, FullApartment
+    ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, FullApartment, OwnerApiModel, CompanyStatisticResult
 from market_app.services.reader_interface import ISalesReader
 
 
@@ -23,17 +23,16 @@ class MongoDbReader(ISalesReader):
     def update_sale_offer_status(self, offer_id: int, update_info: SaleOfferStatusUpdate) -> SaleOffer:
         pass
 
-    def get_average_apartment_prices_by_city_and_street(self, city: str, street_name: str) -> ApartmentPriceByDistrict:
+    def get_average_apartment_prices_by_city(self, city: str, street_name: str) -> ApartmentPriceByDistrict:
         pass
 
-    def get_apartment_sale_offers_by_status(self, query: ApartmentSaleOffersByStatusQuery) -> t.List[
-        ApartmentSaleOffersByStatus]:
+    def get_companies_sales_statistics(self, company_name: str) -> t.List[CompanyStatisticResult]:
         pass
 
-    def search_apartments(self, query: ApartmentSearchQuery) -> t.List[ApartmentSearchResult]:
+    def find_apartment_by_id(self, query: ApartmentSearchQuery) -> t.List[ApartmentOfferAveragePrice]:
         pass
 
-    def get_companies_and_apartments(self) -> t.List[CompanyAndApartments]:
+    def get_owner_by_id(self, owner_id: str) -> OwnerApiModel:
         pass
 
     def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentOfferSearchResult]:
