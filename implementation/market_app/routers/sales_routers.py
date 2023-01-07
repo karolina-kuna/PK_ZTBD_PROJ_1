@@ -8,6 +8,7 @@ from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentI
     ApartmentPriceByDistrict, ApartmentSaleOffersByStatusQuery, ApartmentSaleOffersByStatus, ApartmentSearchQuery, \
     ApartmentOfferAveragePrice, CompanyAndApartments, FullApartment, OwnerApiModel, CompanyStatisticResult
 from market_app.services.reader_manager import ReaderManager, READER_MANAGER
+from market_app.services.reader_options import ReaderOptions
 
 sales_router = APIRouter(prefix="/sales", tags=["Sales"])
 
@@ -88,3 +89,24 @@ def search_apartments(apartment_id: str) -> ApartmentInfo:
 def get_owner_by_id(owner_id: str) -> OwnerApiModel:
     reader_manager: ReaderManager = READER_MANAGER
     return reader_manager.get_owner_by_id(owner_id)
+
+
+# 11. Zmień readera
+@sales_router.put("/reader/next", status_code=status.HTTP_200_OK)
+def change_reader():
+    reader_manager: ReaderManager = READER_MANAGER
+    if reader_manager.reader_type == ReaderOptions.CASSANDRA:
+        reader_manager.change_reader(ReaderOptions.MONGO_DB)
+    elif reader_manager.reader_type == ReaderOptions.MONGO_DB:
+        reader_manager.change_reader(ReaderOptions.POSTGRESQL)
+    else:
+        reader_manager.change_reader(ReaderOptions.CASSANDRA)
+
+    return {"changed_reader": str(reader_manager.reader_type)}
+
+
+# Pobierz reader
+@sales_router.get("/reader", status_code=status.HTTP_200_OK)
+def get_current_reader():
+    reader_manager: ReaderManager = READER_MANAGER
+    return {"current_reader": str(reader_manager.reader_type)}
