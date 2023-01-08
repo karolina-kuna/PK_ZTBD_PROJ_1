@@ -1,18 +1,16 @@
 import typing as t
 
-from cassandra.cluster import Cluster
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
-    CompanyAndApartments, ApartmentSearchQuery, ApartmentOfferAveragePrice, ApartmentSaleOffersByStatusQuery, \
-    ApartmentSaleOffersByStatus, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
-    ApartmentPriceRangeQuery, ApartmentPriceRange, ApartmentInfo, FullApartment, FullApartmentResponse, OwnerApiModel, \
+    ApartmentOfferAveragePrice, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
+    ApartmentPriceRangeQuery, ApartmentInfo, FullApartment, OwnerApiModel, \
     CompanyStatisticResult
 from market_app.models.db_models.cassandra_models import Apartment, Offer
-from market_app.repositories.cassandra_address_repository import CassandraAddressRepository
-from market_app.repositories.cassandra_apartment_repository import CassandraApartmentRepository
-from market_app.repositories.cassandra_offer_repository import CassandraOfferRepository
-from market_app.repositories.cassandra_owner_repository import CassandraOwnerRepository
+from market_app.repositories.cassandra.cassandra_address_repository import CassandraAddressRepository
+from market_app.repositories.cassandra.cassandra_apartment_repository import CassandraApartmentRepository
+from market_app.repositories.cassandra.cassandra_offer_repository import CassandraOfferRepository
+from market_app.repositories.cassandra.cassandra_owner_repository import CassandraOwnerRepository
 from market_app.repositories.repository_dependencies import get_cassandra_session
 from market_app.services.reader_interface import ISalesReader
 from market_app.services.mapper.cassandra_mappers import CassandraMapper

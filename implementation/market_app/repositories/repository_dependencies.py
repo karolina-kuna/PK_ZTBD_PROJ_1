@@ -1,7 +1,6 @@
 from cassandra.cluster import Cluster, Session
-from fastapi import Depends
-
-from market_app.repositories.cassandra_owner_repository import CassandraOwnerRepository
+from pymongo import MongoClient
+from pymongo.database import Database
 
 
 def get_cassandra_session() -> Session:
@@ -10,5 +9,10 @@ def get_cassandra_session() -> Session:
     session.execute('USE market_app')
 
     return session
+
+def get_mongo_db_db() -> Database:
+    CONNECTION_STRING = "mongodb://root:example@localhost:27017"
+    client = MongoClient(CONNECTION_STRING)
+    return client['market_app_db']
 
 

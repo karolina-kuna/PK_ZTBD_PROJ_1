@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from pymongo.database import Database
 
 from market_app.models.db_models.mongodb_models import Owner
-from market_app.repositories.mongo_db_owner_repository import MongoDbOwnerRepository
+from market_app.repositories.mongo_db.mongo_db_owner_repository import MongoDbOwnerRepository
 
 
 def get_database() -> Database:
@@ -21,7 +21,6 @@ owner = Owner(surname="Smith", phone_number="123-456-7890",
               address="123 Main St.", email_address="smith@example.com", company_name="Acme Inc.")
 
 
-mongo_client = MongoClient("mongodb://root:example@localhost:27017")
 repository = MongoDbOwnerRepository(client)
 
 # Insert the owner into the database

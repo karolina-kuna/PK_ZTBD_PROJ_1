@@ -4,7 +4,7 @@ import uuid
 from cassandra.cluster import Cluster
 
 from market_app.models.db_models.cassandra_models import Owner
-from market_app.repositories.cassandra_owner_repository import CassandraOwnerRepository
+from market_app.repositories.cassandra.cassandra_owner_repository import CassandraOwnerRepository
 
 cluster = Cluster()
 

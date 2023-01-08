@@ -69,48 +69,67 @@ db.createCollection("owner_list", {
   }
 })
 
+
 db.createCollection("offer_list", {
-  validator: {
-    $jsonSchema: {
-      bsonType: "object",
-      properties: {
-        address_city: {
-          bsonType: "string",
-          description: "must be a string"
-        },
-        address_street: {
-          bsonType: "string",
-          description: "must be a string"
-        },
-        price: {
-          bsonType: "double",
-          description: "must be a double"
-        },
-        title: {
-          bsonType: "string",
-          description: "must be a string"
-        },
-        area: {
-          bsonType: "double",
-          description: "must be a double"
-        },
-        owner_id: {
-          bsonType: "int",
-          description: "must be an integer"
-        },
-        apartment_id: {
-          bsonType: "int",
-          description: "must be an integer"
-        },
-        company_name: {
-          bsonType: "string",
-          description: "must be a string"
-        }
+   "validator":{
+      "$jsonSchema":{
+         "bsonType":"object",
+         "properties":{
+            "address":{
+         "bsonType":"object",
+               "properties":{
+                  "_id":{
+                     "bsonType":"string",
+                     "description":"must be a string"
+                  },
+                  "city":{
+                     "bsonType":"string",
+                     "description":"must be a string"
+                  },
+                  "street":{
+                     "bsonType":"string",
+                     "description":"must be a string"
+                  }
+               }
+            },
+            "price":{
+               "bsonType":"double",
+               "description":"must be a double"
+            },
+            "title":{
+               "bsonType":"string",
+               "description":"must be a string"
+            },
+            "area":{
+               "bsonType":"double",
+               "description":"must be a double"
+            },
+            "owner":{
+         "bsonType":"object",
+               "properties":{
+                  "_id":{
+                     "bsonType":"string",
+                     "description":"must be a string"
+                  },
+                  "company_name":{
+                     "bsonType":"string",
+                     "description":"must be a string"
+                  }
+               }
+            },
+            "apartment_id":{
+               "bsonType":"int",
+               "description":"must be an integer"
+            },
+            "company_name":{
+               "bsonType":"string",
+               "description":"must be a string"
+            }
+         }
       }
-    }
-  }
+   }
 })
 
-db.offer_list.createIndex({ address_city: 1, address_street: 1 })
-db.offer_list.createIndex({ address_city: 1, address_street: 1, price: 1 })
-db.offer_list.createIndex({ company_name: 1 })
+db.offer_list.createIndex({ "address.city": 1, "address.street": 1 })
+db.offer_list.createIndex({ "address.city": 1, "price": 1 })
+db.offer_list.createIndex({ "owner.company_name": 1 })

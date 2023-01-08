@@ -6,13 +6,13 @@ from market_app.models.api_models import CompanyAndApartments, ApartmentSearchQu
     ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, FullApartment, OwnerApiModel, CompanyStatisticResult
 from market_app.services.reader_interface import ISalesReader
 from market_app.services.cassandra_service import CassandraService
-from market_app.services.mongo_db_reader import MongoDbReader
+from market_app.services.mongo_db_service import MongoDbService
 from market_app.services.reader_options import ReaderOptions
 import collections
 
 TYPE_TO_CLASS_MAP = collections.ChainMap(
     {ReaderOptions.CASSANDRA: CassandraService},
-    {ReaderOptions.MONGO_DB: MongoDbReader}
+    {ReaderOptions.MONGO_DB: MongoDbService}
 )
 
 
@@ -20,7 +20,7 @@ class ReaderManager(ISalesReader):
     def __init__(self, reader_type: ReaderOptions) -> None:
         self.reader_type = reader_type
         self.cassandra_reader = CassandraService()
-        self.mongo_reader = MongoDbReader()
+        self.mongo_reader = MongoDbService()
         self.__resolve_reader()
         pass
 
