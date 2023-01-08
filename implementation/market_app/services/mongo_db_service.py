@@ -1,8 +1,11 @@
 import typing as t
 
+from fastapi import HTTPException, status
+
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
-    ApartmentSearchQuery, ApartmentOfferAveragePrice, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, ApartmentUpdateInfo, \
-    ApartmentPriceRangeQuery, ApartmentPriceRange, FullApartment, OwnerApiModel, CompanyStatisticResult
+    ApartmentSearchQuery, ApartmentOfferAveragePrice, ApartmentPriceByDistrict, SaleOfferStatusUpdate, SaleOffer, \
+    ApartmentUpdateInfo, \
+    ApartmentPriceRangeQuery, ApartmentPriceRange, FullApartment, OwnerApiModel, CompanyStatisticResult, ApartmentInfo
 from market_app.repositories.mongo_db.mongo_db_address_repository import MongoDbAddressRepository
 from market_app.repositories.mongo_db.mongo_db_apartment_repository import MongoDbApartmentRepository
 from market_app.repositories.mongo_db.mongo_db_offer_repository import MongoDbOfferRepository
@@ -10,7 +13,6 @@ from market_app.repositories.mongo_db.mongo_db_owner_repository import MongoDbOw
 from market_app.repositories.repository_dependencies import get_mongo_db_db
 from market_app.services.mapper.mongodb_mapper import MongoDbMapper
 from market_app.services.reader_interface import ISalesReader
-
 
 
 class MongoDbService(ISalesReader):
@@ -24,42 +26,53 @@ class MongoDbService(ISalesReader):
     def create_apartment_with_dependencies(self, apartment: FullApartment) -> FullApartment:
         owner_id = apartment.owner.owner_id
         if not owner_id:
-            owner_model = MongoDbMapper.map_owner_api_model_to_owner_model(apartment.owner)
-            owner_id = self.mongo_db_owner_repository.create(owner_model)
+            owner_entity = MongoDbMapper.map_owner_api_model_to_owner_model(apartment.owner)
+            owner_id = self.mongo_db_owner_repository.create(owner_entity)
+            owner_entity.id = owner_id
         else:
-            owner = MongoDbMapper.map_owner_model_to_owner_api_model(
+            owner_entity = MongoDbMapper.map_owner_model_to_owner_api_model(
                 self.mongo_db_owner_repository.get_by_id(owner_id)
             )
 
         address_id = apartment.address.address_id
         if not address_id:
-            address = self.mongo_db_address_repository.insert(apartment.address)
-            address_id = address.address_id
+            address_entity = MongoDbMapper.map_address_to_address_model(apartment.address)
+            address_id = self.mongo_db_address_repository.create(address_entity)
+            address_entity.id = address_id
         else:
-            address = self.mongo_db_address_repository.find_by_id(address_id)
+            address_entity = MongoDbMapper.map_address_model_to_address(
+                self.mongo_db_address_repository.get_by_id(address_id)
+            )
 
-        apartment_entity = MongoDbMapper.apartment_info_to_apartment(apartment.apartment, owner_id, address_id)
-        saved_apartment: Apartment = self.cassandra_apartment_repository.insert(apartment_entity)
+        apartment_entity = MongoDbMapper.map_apartment_info_to_model(
+            apartment.apartment, owner_id, address_id
+        )
+        saved_apartment_id = self.mongo_db_apartment_repository.create(apartment_entity)
+        apartment_entity.id = saved_apartment_id
 
         saved_offers: [] = []
         for single_offer in apartment.offers:
-            mapped_offer = MongoDbMapper.map_sales_offer_to_offer(single_offer,
-                                                                    saved_apartment,
-                                                                    owner,
-                                                                    address)
-            saved_single_offer = self.cassandra_offer_repository.insert(mapped_offer)
-            saved_offers.append(saved_single_offer)
+            mapped_offer = MongoDbMapper.map_sale_offer_to_offer_model(single_offer,
+                                                                       apartment_entity,
+                                                                       owner_entity,
+                                                                       address_entity)
+            saved_single_offer_id = self.mongo_db_offer_repository.create(mapped_offer)
+            mapped_offer.id = saved_single_offer_id
+            saved_offers.append(mapped_offer)
 
-        return FullApartment(apartment=CassandraMapper.apartment_to_apartment_info(saved_apartment),
-                             owner=owner,
-                             address=address,
-                             offers=CassandraMapper.map_offers_to_api_models(saved_offers))
+        return FullApartment(apartment=MongoDbMapper.map_apartment_model_to_info(apartment_entity),
+                             owner=MongoDbMapper.map_owner_model_to_owner_api_model(owner_entity),
+                             address=MongoDbMapper.map_address_model_to_address(address_entity),
+                             offers=MongoDbMapper.map_offer_models_to_sale_offers(saved_offers))
 
-    def get_offers_by_city_and_price_range(self, query: ApartmentPriceRangeQuery) -> ApartmentPriceRange:
-        pass
+    def get_offers_by_city_and_price_range(self, query: ApartmentPriceRangeQuery) -> t.List[ApartmentOfferSearchResult]:
+        offers = self.mongo_db_offer_repository.get_offers_by_city_and_price_range(
+            query.city, query.min_price, query.max_price
+        )
+        return MongoDbMapper.map_offers_models_to_search_results(offers)
 
     def delete_apartment_sale_offer(self, offer_id: str) -> None:
-        pass
+        self.mongo_db_offer_repository.delete(offer_id)
 
     def update_apartment(self, apartment_id: int, update_info: ApartmentUpdateInfo) -> None:
         pass
@@ -73,11 +86,20 @@ class MongoDbService(ISalesReader):
     def get_companies_sales_statistics(self, company_name: str) -> t.List[CompanyStatisticResult]:
         pass
 
-    def find_apartment_by_id(self, query: ApartmentSearchQuery) -> t.List[ApartmentOfferAveragePrice]:
-        pass
+    def find_apartment_by_id(self, apartment_id: str) -> ApartmentInfo:
+        apartment_entity = self.mongo_db_apartment_repository.get_by_id(apartment_id)
+        if not apartment_entity:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f'Apartment with id: {apartment_id} couldn\'t be found')
+
+        return MongoDbMapper.map_apartment_model_to_info(apartment_entity)
 
     def get_owner_by_id(self, owner_id: str) -> OwnerApiModel:
-        pass
+        owner_entity = self.mongo_db_owner_repository.get_by_id(owner_id)
+        if not owner_entity:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f'Owner with id: {owner_id} couldn\'t be found')
+        return MongoDbMapper.map_owner_model_to_owner_api_model(owner_entity)
 
     def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentOfferSearchResult]:
         print("Mongo Called")

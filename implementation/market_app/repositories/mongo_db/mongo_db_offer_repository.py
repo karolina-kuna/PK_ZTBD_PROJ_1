@@ -39,11 +39,11 @@ class MongoDbOfferRepository:
         rows = self.collection.find({"address.city": city, "address.street": address})
         return [OfferModel(**offer_dict) for offer_dict in rows]
 
-    def get_offers_by_city_and_address_and_price_range(self, city: str, address: str, min_price: int,
-                                                       max_price: int) -> list:
+    def get_offers_by_city_and_price_range(self, city: str,
+                                           min_price: float,
+                                           max_price: float) -> list:
         rows = self.collection.find({
             "address.city": city,
-            "address.street": address,
             "price": {
                 "$gte": min_price,
                 "$lte": max_price

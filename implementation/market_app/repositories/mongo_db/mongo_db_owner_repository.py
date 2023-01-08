@@ -23,7 +23,7 @@ class MongoDbOwnerRepository:
         self.collection.delete_one({"_id": owner_id})
 
     def get_by_id(self, owner_id: str) -> OwnerModel:
-        owner_dict = self.collection.find_one({"_id": owner_id})
+        owner_dict = self.collection.find_one({"_id": ObjectId(owner_id)})
         return OwnerModel(**owner_dict) if owner_dict is not None else None
 
     def get_all(self) -> list:

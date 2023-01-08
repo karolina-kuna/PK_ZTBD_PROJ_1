@@ -62,7 +62,7 @@ db.createCollection("owner_list", {
         },
         company_name: {
           bsonType: "string",
-          description: "must be a string"
+          description: "must be a string",
         }
       }
     }
@@ -100,6 +100,30 @@ db.createCollection("offer_list", {
                "bsonType":"string",
                "description":"must be a string"
             },
+            "status":{
+               "bsonType":"string",
+               "description":"must be a string"
+            },
+            "description":{
+               "bsonType":"string",
+               "description":"must be a string"
+            },
+            "agency_fee":{
+               "bsonType":"double",
+               "description":"must be a double"
+            },
+            "negotiable":{
+               "bsonType":"bool",
+               "description":"must be a bool"
+            },
+            "creation_date":{
+               "bsonType":"date",
+               "description":"must be a bool"
+            },
+            "modification_date":{
+               "bsonType":"date",
+               "description":"must be a bool"
+            },
             "area":{
                "bsonType":"double",
                "description":"must be a double"
@@ -118,12 +142,13 @@ db.createCollection("offer_list", {
                }
             },
             "apartment_id":{
-               "bsonType":"int",
-               "description":"must be an integer"
+               "bsonType":"objectId",
+               "description":"must be an string"
             },
             "company_name":{
                "bsonType":"string",
-               "description":"must be a string"
+               "description":"must be a string",
+                "optional": true
             }
          }
       }

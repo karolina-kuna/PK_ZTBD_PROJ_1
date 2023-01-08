@@ -1,3 +1,5 @@
+import datetime
+
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
@@ -26,15 +28,17 @@ class PyObjectId(ObjectId):
         field_schema.update(type="string")
 
 
-class OfferAddressModel(BaseModel):
-    id: PyObjectId
+class OfferAddressModel:
+    id: str
     city: str
     street: str
 
 
-class OfferOwnerModel(BaseModel):
-    id: PyObjectId
+class OfferOwnerModel:
+    id: str
     company_name: str
+
+
 
 
 class OfferModel(BaseModel):
@@ -42,9 +46,15 @@ class OfferModel(BaseModel):
     address: Dict[str, Any] = Field(...)
     price: float = Field(..., gt=0.0)
     title: str = Field(...)
+    status: str = Field(...)
+    description: str = Field(...)
+    agency_fee: float = Field(...)
+    negotiable: bool = Field(...)
+    creation_date: datetime.datetime = Field(...)
+    modification_date: datetime.datetime = Field(...)
     area: float = Field(..., gt=0.0)
     owner: Dict[str, Any] = Field(...)
-    apartment_id: int = Field(..., gt=0)
+    apartment_id: PyObjectId = Field(default_factory=PyObjectId)
 
     class Config:
         allow_population_by_field_name = True
@@ -93,22 +103,6 @@ class AddressModel(BaseModel):
         }
 
 
-class Owner:
-    def __init__(self, surname: str, phone_number: str, address: str, email_address: str,
-                 company_name: str, _id=None):
-        if _id is not None:
-            self._id = _id
-
-        self.surname = surname
-        self.phone_number = phone_number
-        self.address = address
-        self.email_address = email_address
-        self.company_name = company_name
-
-    @property
-    def id(self):
-        return self._id if hasattr(self, '_id') else None
-
 class OwnerModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str = Field(...)
@@ -116,7 +110,25 @@ class OwnerModel(BaseModel):
     phone_number: str = Field(...)
     address: str = Field(...)
     email_address: str = Field(...)
-    company_name: Optional[str]
+    company_name: Optional[str] = Field()
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+
+class ApartmentModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    area: float = Field(...)
+    creation_year: int = Field(...)
+    last_renovation_year: int = Field(...)
+    building_type: str = Field(...)
+    heating_type: str = Field(...)
+    is_furnished: bool = Field(...)
+    rooms_count: int = Field(...)
+    owner_id: PyObjectId = Field(default_factory=PyObjectId)
+    address_id: PyObjectId = Field(default_factory=PyObjectId)
 
     class Config:
         allow_population_by_field_name = True
