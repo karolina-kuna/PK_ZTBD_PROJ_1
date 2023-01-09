@@ -3,7 +3,8 @@ from typing import List
 
 from bson import ObjectId
 
-from market_app.models.api_models import OwnerApiModel, Address, SaleOffer, ApartmentInfo, ApartmentOfferSearchResult
+from market_app.models.api_models import OwnerApiModel, Address, SaleOffer, ApartmentInfo, ApartmentOfferSearchResult, \
+    ApartmentUpdateInfo
 from market_app.models.db_models.fast_api_mongodb_models import OwnerModel, AddressModel, OfferModel, ApartmentModel, \
     PyObjectId
 
@@ -145,3 +146,17 @@ class MongoDbMapper:
     @staticmethod
     def map_offers_models_to_search_results(offer_models: List[OfferModel]) -> List[ApartmentOfferSearchResult]:
         return list(map(lambda x: MongoDbMapper.map_offer_model_to_search_result(x), offer_models))
+
+    @staticmethod
+    def map_apartment_update_info_to_apartment_model(update_info: ApartmentUpdateInfo) -> ApartmentModel:
+        return ApartmentModel(
+            area=update_info.area,
+            creation_year=update_info.creation_year,
+            last_renovation_year=update_info.last_renovation_year,
+            building_type=update_info.building_type,
+            heating_type=update_info.heating_type,
+            is_furnished=update_info.furnished,
+            rooms_count=update_info.rooms_count,
+            address_id=ObjectId(update_info.address_id),
+            owner_id=ObjectId(update_info.owner_id)
+        )

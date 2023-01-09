@@ -1,5 +1,6 @@
 import typing as t
 
+from bson import ObjectId
 from fastapi import HTTPException, status
 
 from market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
@@ -74,17 +75,27 @@ class MongoDbService(ISalesReader):
     def delete_apartment_sale_offer(self, offer_id: str) -> None:
         self.mongo_db_offer_repository.delete(offer_id)
 
-    def update_apartment(self, apartment_id: int, update_info: ApartmentUpdateInfo) -> None:
-        pass
+    def update_apartment(self, apartment_id: str, update_info: ApartmentUpdateInfo) -> ApartmentInfo:
+        mapped_entity = MongoDbMapper.map_apartment_update_info_to_apartment_model(update_info)
+        mapped_entity.id = ObjectId(apartment_id)
+        self.mongo_db_apartment_repository.update(mapped_entity)
+        return MongoDbMapper.map_apartment_model_to_info(mapped_entity)
 
-    def update_sale_offer_status(self, offer_id: int, update_info: SaleOfferStatusUpdate) -> SaleOffer:
-        pass
+    def update_sale_offer_status(self, offer_id: str, update_info: SaleOfferStatusUpdate) -> SaleOffer:
+        offer_entity = self.mongo_db_offer_repository.get_by_id(offer_id)
+        if not offer_entity:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f'Offer with id: {offer_id} couldn\'t be found')
 
-    def get_average_apartment_prices_by_city(self, city: str, street_name: str) -> ApartmentPriceByDistrict:
-        pass
+        offer_entity.status = update_info.status
+        self.mongo_db_offer_repository.update(offer_entity)
+        return MongoDbMapper.map_offer_model_to_sale_offer(offer_entity)
+
+    def get_average_apartment_prices_by_city(self, city: str) -> t.List[ApartmentOfferAveragePrice]:
+        return self.mongo_db_offer_repository.get_average_price_by_city(city)
 
     def get_companies_sales_statistics(self, company_name: str) -> t.List[CompanyStatisticResult]:
-        pass
+        return self.mongo_db_offer_repository.get_companies_sales_statistics(company_name)
 
     def find_apartment_by_id(self, apartment_id: str) -> ApartmentInfo:
         apartment_entity = self.mongo_db_apartment_repository.get_by_id(apartment_id)
@@ -102,5 +113,7 @@ class MongoDbService(ISalesReader):
         return MongoDbMapper.map_owner_model_to_owner_api_model(owner_entity)
 
     def search_apartments_for_sale(self, query: ApartmentForSaleSearchQuery) -> t.List[ApartmentOfferSearchResult]:
-        print("Mongo Called")
-        pass
+        offers = self.mongo_db_offer_repository.get_offers_by_city_and_address(
+            query.city, query.street_name
+        )
+        return MongoDbMapper.map_offers_models_to_search_results(offers)
