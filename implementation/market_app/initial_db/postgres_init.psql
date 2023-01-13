@@ -1,0 +1,46 @@
+-- Create the address table
+CREATE TABLE address (
+    id SERIAL PRIMARY KEY,
+    street_name VARCHAR(255) NOT NULL,
+    building_nr VARCHAR(255) NOT NULL,
+    apartment_nr VARCHAR(255),
+    postal_code VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL
+);
+-- Create the owner table
+CREATE TABLE owner (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    surname VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(255) NOT NULL,
+    email_address VARCHAR(255) NOT NULL,
+    company_name VARCHAR(255),
+    address_id INTEGER REFERENCES address(id)
+);
+-- Create the apartment table
+CREATE TABLE apartment (
+    id SERIAL PRIMARY KEY,
+    area DECIMAL(3,2) NOT NULL,
+    creation_year INTEGER(4) NOT NULL,
+    last_renovation_year INTEGER,
+    building_type VARCHAR(14) NOT NULL,
+    heating_type VARCHAR(10) NOT NULL,
+    is_furnished BOOLEAN NOT NULL,
+    rooms_count INTEGER(4) NOT NULL,
+    address_id INTEGER UNIQUE NOT NULL REFERENCES address(id),
+    owner_id INTEGER NOT NULL REFERENCES owner(id)
+);
+
+
+-- Create the sale_offer table
+CREATE TABLE sale_offer (
+    id SERIAL PRIMARY KEY,
+    creation_date DATE NOT NULL,
+    price DECIMAL(8,2)NOT NULL,
+    negotiable BOOLEAN NOT NULL,
+    status VARCHAR(8) NOT NULL,
+    modification_date DATE,
+    description VARCHAR(300),
+    agency_fee DECIMAL(8,2),
+    apartment_id INTEGER REFERENCES apartment(id)
+);

@@ -4,7 +4,7 @@ ENV GUNICORN_LOG_LEVEL="info"
 
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y gcc python-dev
+RUN apt-get update && apt-get install -y gcc python-dev libpq-dev musl-dev
 #RUN apt-get install -y libpq-dev postgresql-client
 #RUN apt-get install -y wget \
 #    && wget https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz \

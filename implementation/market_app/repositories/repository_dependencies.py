@@ -16,3 +16,12 @@ def get_mongo_db_db() -> Database:
     return client['market_app_db']
 
 
+def get_postgres_db():
+    connection = psycopg2.connect(
+        user="user",
+        password="Password",
+        host="database",
+        port="5432",
+        database="database"
+    )
+    return connection
