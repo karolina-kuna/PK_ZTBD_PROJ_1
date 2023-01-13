@@ -10,9 +10,12 @@ from market_app.services.mongo_db_service import MongoDbService
 from market_app.services.reader_options import ReaderOptions
 import collections
 
+from implementation.market_app.services.postgres_service import PostgresSQLService
+
 TYPE_TO_CLASS_MAP = collections.ChainMap(
     {ReaderOptions.CASSANDRA: CassandraService},
-    {ReaderOptions.MONGO_DB: MongoDbService}
+    {ReaderOptions.MONGO_DB: MongoDbService},
+    {ReaderOptions.POSTGRESQL: PostgresSQLService}
 )
 
 
@@ -21,6 +24,7 @@ class ReaderManager(ISalesReader):
         self.reader_type = reader_type
         self.cassandra_reader = CassandraService()
         self.mongo_reader = MongoDbService()
+        self.postgresql = PostgresSQLService()
         self.__resolve_reader()
         pass
 
@@ -59,8 +63,11 @@ class ReaderManager(ISalesReader):
             self.current_reader = self.cassandra_reader
         elif self.reader_type == ReaderOptions.MONGO_DB:
             self.current_reader = self.mongo_reader
+        elif self.reader_type == ReaderOptions.POSTGRESQL:
+              self.current_reader = self.postgresql
         else:
             raise Exception("Unsupported state, no reader choosen")
+
 
     def change_reader(self, reader_type: ReaderOptions):
         self.reader_type = reader_type
