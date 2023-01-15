@@ -1,9 +1,9 @@
 from datetime import date
 
 
-class SaleOffer:
+class Offer:
     def __init__(self,
-                 offer_id: str,
+                 offer_id: id,
                  price: float,
                  status: str,
                  negotiable: bool,
@@ -11,7 +11,7 @@ class SaleOffer:
                  agency_fee: float,
                  creation_date: date,
                  modification_date: date,
-                 apartment_id: str,
+                 apartment_id: id
                  ):
         self.offer_id = offer_id
         self.price = price
@@ -25,10 +25,10 @@ class SaleOffer:
 
 
 class Apartment:
-    def __init__(self, apartment_id: str, area: float, creation_year: int, last_renovation_year: int,
+    def __init__(self, apartment_id: id, area: float, creation_year: int, last_renovation_year: int,
                  building_type: str, heating_type: str, is_furnished: bool, rooms_count: int,
-                 owner_id: str,
-                 address_id: str):
+                 owner_id: id,
+                 address_id: id):
         self.apartment_id = apartment_id
         self.area = area
         self.creation_year = creation_year
@@ -42,7 +42,7 @@ class Apartment:
 
 
 class Owner:
-    def __init__(self, owner_id: str, name: str, surname: str, phone_number: str,email_address: str,
+    def __init__(self, owner_id: id, name: str, surname: str, phone_number: str, email_address: str,
                  company_name: str, address_id: int):
         self.owner_id = owner_id
         self.name = name
@@ -54,7 +54,7 @@ class Owner:
 
 
 class Address:
-    def __init__(self, address_id: str, city: str, street_name: str, building_nr: str, apartment_nr: str,
+    def __init__(self, address_id: id, city: str, street_name: str, building_nr: str, apartment_nr: str,
                  postal_code: str):
         self.address_id = address_id
         self.city = city
@@ -62,3 +62,5 @@ class Address:
         self.building_nr = building_nr
         self.apartment_nr = apartment_nr
         self.postal_code = postal_code
+
+

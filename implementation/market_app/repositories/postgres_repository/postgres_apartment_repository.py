@@ -1,6 +1,6 @@
 from typing import List
 
-from implementation.market_app.models.db_models.postgres_models import Apartment
+from implementation.market_app.models.postgres_models import Apartment
 from implementation.market_app.repositories.repository_dependencies import get_postgres_db
 
 
@@ -15,12 +15,12 @@ class PostgresApartmentRepository:
         CREATE TABLE IF NOT EXISTS apartment (
             id SERIAL PRIMARY KEY,
             area DECIMAL(3,2) NOT NULL,
-            creation_year INTEGER(4) NOT NULL,
+            creation_year INTEGER NOT NULL,
             last_renovation_year INTEGER,
             building_type VARCHAR(14) NOT NULL,
             heating_type VARCHAR(10) NOT NULL,
             is_furnished BOOLEAN NOT NULL,
-            rooms_count INTEGER(4) NOT NULL,
+            rooms_count INTEGER NOT NULL,
             address_id INTEGER REFERENCES address(id) ON DELETE CASCADE,
             owner_id INTEGER NOT NULL REFERENCES owner(id)
         );"""
@@ -39,9 +39,9 @@ class PostgresApartmentRepository:
                  apartment.owner_id))
             inserted_apartment = cur.fetchone()
         self.conn.commit()
-        return Apartment(**inserted_apartment)
+        return Apartment(*inserted_apartment)
 
-    def update(self, updated_apartment: Apartment):
+    def update(self, updated_apartment: Apartment, apartment_id: int):
         with self.conn.cursor() as cursor:
             cursor.execute("""
                 UPDATE apartment
@@ -50,7 +50,7 @@ class PostgresApartmentRepository:
                 WHERE id = %s
                 """, (updated_apartment.area, updated_apartment.creation_year, updated_apartment.last_renovation_year,
                       updated_apartment.building_type, updated_apartment.heating_type, updated_apartment.is_furnished,
-                      updated_apartment.rooms_count), updated_apartment.address_id, updated_apartment.owner_id)
+                      updated_apartment.rooms_count, updated_apartment.address_id, updated_apartment.owner_id, apartment_id))
             self.conn.commit()
 
     def delete(self, apartment_id: int) -> None:
@@ -58,7 +58,7 @@ class PostgresApartmentRepository:
             cursor.execute("DELETE FROM apartment WHERE id = %s", (apartment_id,))
         self.conn.commit()
 
-    def get_by_id(self, apartment_id: int) -> Apartment:
+    def get_by_id(self, apartment_id: int) -> Apartment | None:
         with self.conn.cursor() as cursor:
             cursor.execute("SELECT * FROM apartment WHERE id = %s", (apartment_id,))
             result = cursor.fetchone()
@@ -71,4 +71,4 @@ class PostgresApartmentRepository:
         with self.conn.cursor() as cursor:
             cursor.execute("SELECT * FROM apartment")
             results = cursor.fetchall()
-        return [Apartment(**result) for result in results]
+        return [Apartment(*result) for result in results]

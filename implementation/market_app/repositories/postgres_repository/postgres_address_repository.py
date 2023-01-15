@@ -1,8 +1,9 @@
 from typing import List
 
+import self
 from psycopg2.extras import RealDictCursor
 
-from implementation.market_app.models.db_models.postgres_models import Address
+from implementation.market_app.models.postgres_models import Address
 from implementation.market_app.repositories.repository_dependencies import get_postgres_db
 
 
@@ -12,6 +13,8 @@ class PostgresAddressRepository:
         self.conn = get_postgres_db()
 
     def create_table(self):
+        print("xD")
+
         with self.conn.cursor() as cur:
             cur.execute('''CREATE TABLE IF NOT EXISTS address (
                                        id SERIAL PRIMARY KEY,
@@ -49,7 +52,7 @@ class PostgresAddressRepository:
             cur.execute("DELETE FROM address WHERE id = %s", (address_id,))
         self.conn.commit()
 
-    def find_by_id(self, address_id: int) -> Address:
+    def find_by_id(self, address_id: int) -> Address | None:
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM address WHERE id = %s", (address_id,))
             address_data = cur.fetchone()
@@ -62,14 +65,37 @@ class PostgresAddressRepository:
 
     def find_by_city_and_street(self, city: str, street: str) -> List[Address]:
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM address WHERE city = %s AND street = %s", (city, street))
+            cur.execute("SELECT * FROM address WHERE city = %s AND street_name = %s", (city, street))
             addresses_data = cur.fetchall()
         if addresses_data:
             return [
-                Address(addresses_data['id'], address_data["city"], address_data["street_name"],
-                        address_data["building_nr"],
-                        address_data["apartment_nr"], address_data["postal_code"])
+                Address(address_data['id'], address_data['city'], address_data['street_name'],
+                        address_data['building_nr'],
+                        address_data['apartment_nr'], address_data['postal_code'])
                 for address_data in addresses_data
             ]
         else:
             raise ValueError("Addresses not found in database")
+
+    def find_address_by_offer_id(self, offer_id: int) -> Address | None:
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "select * from address where id in (select address_id from apartment where id in (select apartment_id "
+                "from offer where id = %s))",
+                (offer_id,))
+            result = cursor.fetchone()
+        if result:
+            return Address(*result)
+        else:
+            return None
+
+    def find_address_by_owner_id(self, owner_id: int) -> Address | None:
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "select * from address where id in (select address_id from apartment where owner_id = %s)",
+                (owner_id,))
+            result = cursor.fetchone()
+        if result:
+            return Address(*result)
+        else:
+            return None

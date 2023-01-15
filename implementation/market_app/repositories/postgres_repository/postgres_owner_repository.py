@@ -1,6 +1,6 @@
-from typing import List, Dict
+from typing import List
 
-from implementation.market_app.models.db_models.postgres_models import Owner
+from implementation.market_app.models.postgres_models import Owner
 from implementation.market_app.repositories.repository_dependencies import get_postgres_db
 
 
@@ -33,9 +33,9 @@ class PostgresOwnerRepository:
             )
             inserted_owner = cur.fetchone()
         self.conn.commit()
-        return Owner(**inserted_owner)
+        return Owner(*inserted_owner)
 
-    def get_by_id(self, id: int) -> Owner:
+    def get_by_id(self, id: int) -> Owner | None:
         with self.conn.cursor() as cursor:
             cursor.execute("SELECT * FROM owner WHERE id = %s", (id,))
             result = cursor.fetchone()
@@ -59,8 +59,15 @@ class PostgresOwnerRepository:
             cur.execute("DELETE FROM owner WHERE id = %s", (owner_id,))
         self.conn.commit()
 
-    def get_all(self) -> List[dict]:
+    def get_all(self) -> List[Owner]:
         with self.conn.cursor() as cursor:
             cursor.execute("SELECT * FROM owner")
             owners = cursor.fetchall()
-        return [dict(owner) for owner in owners]
+        if owners:
+            return [Owner(owner[0], owner[1], owner[2],
+                          owner[3],
+                          owner[4], owner[5], owner[6])
+                    for owner in owners
+                    ]
+        else:
+            raise ValueError("Addresses not found in database")

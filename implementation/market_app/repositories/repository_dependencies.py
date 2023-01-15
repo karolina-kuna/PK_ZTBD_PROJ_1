@@ -1,26 +1,27 @@
-from cassandra.cluster import Cluster, Session
+import psycopg2
+# from cassandra.cluster import Cluster, Session
 from pymongo import MongoClient
 from pymongo.database import Database
 
 
-def get_cassandra_session() -> Session:
-    cluster = Cluster(protocol_version=5)
-    session = cluster.connect('market_app', wait_for_all_pools=True)
-    session.execute('USE market_app')
+# def get_cassandra_session() -> Session:
+#     cluster = Cluster(protocol_version=5)
+#     session = cluster.connect('market_app', wait_for_all_pools=True)
+#     session.execute('USE market_app')
+#
+#     return session
 
-    return session
-
-def get_mongo_db_db() -> Database:
-    CONNECTION_STRING = "mongodb://root:example@localhost:27017"
-    client = MongoClient(CONNECTION_STRING)
-    return client['market_app_db']
+# def get_mongo_db_db() -> Database:
+#     CONNECTION_STRING = "mongodb://root:example@localhost:27017"
+#     client = MongoClient(CONNECTION_STRING)
+#     return client['market_app_db']
 
 
 def get_postgres_db():
     connection = psycopg2.connect(
-        user="user",
-        password="Password",
-        host="database",
+        user="postgres",
+        password="1234",
+        host="localhost",
         port="5432",
         database="database"
     )

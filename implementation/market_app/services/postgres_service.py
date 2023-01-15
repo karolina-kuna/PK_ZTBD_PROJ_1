@@ -1,11 +1,12 @@
 import typing as t
 from abc import ABC
+
 from fastapi import HTTPException, status
 
 from implementation.market_app.models.api_models import ApartmentForSaleSearchQuery, ApartmentOfferSearchResult, \
     FullApartment, ApartmentPriceRangeQuery, ApartmentUpdateInfo, ApartmentInfo, \
-    SaleOfferStatusUpdate, SaleOffer, ApartmentOfferAveragePrice, CompanyStatisticResult, OwnerApiModel
-from implementation.market_app.models.db_models.postgres_models import Apartment
+    SaleOfferStatusUpdate, ApartmentOfferAveragePrice, CompanyStatisticResult, OwnerApiModel, SaleOffer
+from implementation.market_app.models.postgres_models import Apartment, Offer
 from implementation.market_app.repositories.postgres_repository.postgres_address_repository import \
     PostgresAddressRepository
 from implementation.market_app.repositories.postgres_repository.postgres_apartment_repository import \
@@ -21,7 +22,7 @@ class PostgresSQLService(ISalesReader, ABC):
 
     def __init__(self):
         self.postgres_owner_repository = PostgresOwnerRepository()
-        self.postgres_apartment_repository = PostgresApartmentRepository
+        self.postgres_apartment_repository = PostgresApartmentRepository()
         self.postgres_offer_repository = PostgresOfferRepository()
         self.postgres_address_repository = PostgresAddressRepository()
 
@@ -29,7 +30,7 @@ class PostgresSQLService(ISalesReader, ABC):
         offers = self.postgres_offer_repository.get_offers_by_city_and_address(query.city, query.street_name)
         return list(map(lambda x: PostgresMapper.map_offer_to_apartment_for_sale_result(x), offers))
 
-    def create_apartment_with_dependencies(self, full_apartment: FullApartment) -> None:
+    def create_apartment_with_dependencies(self, full_apartment: FullApartment) -> FullApartment:
         owner_id = apartment.owner_id
         if not owner_id:
             owner = self.postgres_owner_repository.insert(apartment.owner_id)
@@ -56,10 +57,10 @@ class PostgresSQLService(ISalesReader, ABC):
             saved_single_offer = self.postgres_offer_repository.insert(mapped_offer)
             saved_offers.append(saved_single_offer)
 
-        # return FullApartment(apartment=PostgresMapper.apartment_to_apartment_info(saved_apartment),
-        #                      owner=owner,
-        #                      address=address,
-        #                      offers=PostgresMapper.map_offers_to_api_models(saved_offers))
+        return FullApartment(apartment=PostgresMapper.apartment_to_apartment_info(saved_apartment),
+                             owner=owner,
+                             address=address,
+                             offers=PostgresMapper.map_offers_to_api_models(saved_offers))
 
     def get_offers_by_city_and_price_range(self, query: ApartmentPriceRangeQuery) -> list[ApartmentOfferSearchResult]:
         offers = self.postgres_offer_repository.get_offers_by_city_and_price_range(
@@ -79,7 +80,7 @@ class PostgresSQLService(ISalesReader, ABC):
                                 detail=f'Apartment with id: {apartment_id} couldn\'t be found')
 
         updated_apartment = PostgresMapper.apartment_update_to_apartment(update_info, curr_apartment)
-        self.postgres_apartment_repository.update(updated_apartment)
+        self.postgres_apartment_repository.update(updated_apartment,curr_apartment.apartment_id)
         return PostgresMapper.apartment_to_apartment_info(updated_apartment)
 
     # def update_sale_offer_status(self, offer_id: int, update_info: SaleOfferStatusUpdate) -> SaleOffer:
@@ -96,14 +97,14 @@ class PostgresSQLService(ISalesReader, ABC):
     #     self.postgres_offer_repository.update(offer_full[0])
     #     return PostgresMapper.map_offer_to_api_model(offer_full)
 
-    def update_sale_offer_status(self, offer_id: int, update_info: SaleOfferStatusUpdate) -> SaleOffer:
-        return self.postgres_offer_repository.update_sale_offer_status(offer_id, update_info)
+    def update_sale_offer_status(self, offer_id: str, update_info: SaleOfferStatusUpdate) -> Offer:
+        return self.postgres_offer_repository.update_sale_offer_status(int(offer_id), update_info)
 
     def get_average_apartment_prices_by_city(self, city: str) -> t.List[ApartmentOfferAveragePrice]:
         return self.postgres_offer_repository.get_average_price_by_city(city)
 
     def get_companies_sales_statistics(self, company_name: str) -> t.List[CompanyStatisticResult]:
-        return [self.postgres_offer_repository.get_statistic_by_company(company_name)] ## ???
+        return self.postgres_offer_repository.get_statistic_by_company(company_name)
 
     def find_apartment_by_id(self, apartment_id: str) -> ApartmentInfo:
         _apartment = self.postgres_apartment_repository.get_by_id(int(apartment_id))
@@ -111,7 +112,7 @@ class PostgresSQLService(ISalesReader, ABC):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f'Apartment with id: {apartment_id} couldn\'t be found')
 
-        return PostgresMapper.apartment_to_apartment_info(apartment)
+        return PostgresMapper.apartment_to_apartment_info(_apartment)
 
     def get_owner_by_id(self, owner_id: str) -> OwnerApiModel:
         owner = self.postgres_owner_repository.get_by_id(int(owner_id))
