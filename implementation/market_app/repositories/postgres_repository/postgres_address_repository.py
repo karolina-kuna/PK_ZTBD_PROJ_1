@@ -13,7 +13,6 @@ class PostgresAddressRepository:
         self.conn = get_postgres_db()
 
     def create_table(self):
-        print("xD")
 
         with self.conn.cursor() as cur:
             cur.execute('''CREATE TABLE IF NOT EXISTS address (
