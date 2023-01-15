@@ -33,7 +33,7 @@ CREATE TABLE apartment (
 
 
 -- Create the sale_offer table
-CREATE TABLE sale_offer (
+CREATE TABLE offer (
     id SERIAL PRIMARY KEY,
     price DECIMAL(8,2)NOT NULL,
     status VARCHAR(8) NOT NULL,
